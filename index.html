@@ -319,6 +319,101 @@
             display: block;
         }
 
+        .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: #2196f3;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .help-icon:hover {
+            background: #1976d2;
+            transform: scale(1.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .modal-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .party-types-list {
+            columns: 2;
+            column-gap: 30px;
+            line-height: 1.8;
+            margin-top: 15px;
+        }
+
+        .party-types-list li {
+            break-inside: avoid;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+
+        .disclaimer {
+            text-align: center;
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            font-style: italic;
+        }
+
         .stats-bar {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 20px;
@@ -517,7 +612,7 @@
             <div class="instructions">
                 <h3>📋 Instructions</h3>
                 <ol>
-                    <li>Copy the attorney info listed on PACER from Plaintiff through the last contact info for defense counsel (or some subset thereof)</li>
+                    <li>Copy the attorney info listed on PACER from Plaintiff through the last contact info for defense counsel (or some subset thereof) <span class="help-icon" onclick="showPartyTypes()">?</span></li>
                     <li>Paste it into the text area below</li>
                     <li>Click "Parse Counsel Data" to extract attorney information</li>
                     <li>Review the parsed data, then click "Generate Excel File" to download the contact info -- making it easy to create an email list of plaintiff or defense counsel, etc.</li>
@@ -545,6 +640,48 @@
             </div>
 
             <div id="results" class="results"></div>
+            
+            <div class="disclaimer">
+                This offering is made without any warranty, express or implied.
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Party Types -->
+    <div id="partyTypesModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePartyTypes()">&times;</span>
+            <div class="modal-header">Supported Party Types</div>
+            <p>This script seeks to capture counsel information for the following party types listed on ECF/PACER:</p>
+            <ul class="party-types-list">
+                <li>Plaintiff</li>
+                <li>Defendant</li>
+                <li>Additional Defendant</li>
+                <li>Respondent</li>
+                <li>Movant</li>
+                <li>Petitioner</li>
+                <li>Applicant</li>
+                <li>Intervenor</li>
+                <li>Appellant</li>
+                <li>Appellee</li>
+                <li>Special Master</li>
+                <li>Third Party Defendant</li>
+                <li>Mediator</li>
+                <li>Amicus</li>
+                <li>Material Witness</li>
+                <li>Counterclaimant</li>
+                <li>Counter Claimant</li>
+                <li>Counterclaim Defendant</li>
+                <li>Counter Defendant</li>
+                <li>Interested Party</li>
+                <li>Nominal Defendant</li>
+                <li>Objector</li>
+                <li>Third Party Plaintiff</li>
+                <li>Thirdparty Plaintiff</li>
+                <li>Thirdparty Defendant</li>
+                <li>In Re</li>
+                <li>Garnishee</li>
+            </ul>
         </div>
     </div>
 
@@ -1026,6 +1163,22 @@
             document.getElementById('results').innerHTML = '';
             document.getElementById('excelBtn').disabled = true;
             parsedAttorneys = [];
+        }
+
+        function showPartyTypes() {
+            document.getElementById('partyTypesModal').style.display = 'block';
+        }
+
+        function closePartyTypes() {
+            document.getElementById('partyTypesModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('partyTypesModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
         }
     </script>
 </body>
