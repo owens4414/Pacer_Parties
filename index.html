@@ -528,7 +528,7 @@
 
     <footer style="text-align: center; padding: 20px 0; font-size: 12px; color: #6c757d;">
         <p>This offering is made without any warranty, express or implied.</p>
-        <p><a href="#" onclick="showLicenseModal(); return false;" style="color: #6c757d; text-decoration: none;">Licenses</a></p>
+        <p><a href="#" onclick="showLicenseModal(); return false;" style="color: #6c757d; text-decoration: none;">View Dependency Licenses</a></p>
     </footer>
 
     <div id="helpModal" class="modal">
@@ -552,7 +552,7 @@
 
         function showLicenseModal() {
             const licenseContent = `
-                <h3 style="color: #2c3e50; margin-bottom: 20px;">Dependency License Information</h3>
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">License</h3>
                 <p>This application uses the following third-party library:</p>
                 <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: left;">
                     <strong style="font-size: 1.1em; color: #1e3c72;">SheetJS (xlsx.js)</strong>
@@ -734,6 +734,7 @@
             }
         }
 
+
         function isAttorneyName(line) {
             if (!line || line.trim() === '') return false;
             const normalizedLine = line.replace(/\s*,\s*/g, ', ').trim();
@@ -748,22 +749,54 @@
         }
 
         function buildAttorneyRecord(name, infoLines, party, partyStatus) {
-            let firmAddress = '', phone = '', fax = '', email = '', terminated = false;
-            if (infoLines.some(line => line.includes('(See above'))) {
-                return { party: party, partyStatus: partyStatus, name: name.trim(), firmAddress: '(See above for address)', phone: '', fax: '', email: '', terminated: false, unrepresented: false };
-            }
+            let firmAddress = '';
+            let phone = '';
+            let fax = '';
+            let email = '';
+            let terminated = false;
             let firmAddressParts = [];
+
+            // Check for "See above for address"
+            if (infoLines.some(line => line.includes('(See above'))) {
+                firmAddress = '(See above for address)';
+            }
+
             for (const line of infoLines) {
-                if (line.includes('TERMINATED')) { terminated = true; } 
-                else if (line.includes('@')) { const emailMatch = line.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/); if (emailMatch) email = emailMatch[1]; } 
-                else if (line.includes('Fax:')) { fax = line.replace('Fax:', '').trim(); } 
-                else if (line.match(/^\d{3}-\d{3}-\d{4}/)) { phone = line.trim(); } 
-                else if (line.trim() && !line.includes('ATTORNEY TO BE NOTICED') && !line.includes('LEAD ATTORNEY') && !line.includes('PRO HAC VICE')) { firmAddressParts.push(line.trim()); }
+                if (line.includes('TERMINATED')) {
+                    terminated = true;
+                } else if (line.includes('@')) {
+                    const emailMatch = line.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+                    if (emailMatch) {
+                        email = emailMatch[1];
+                    }
+                } else if (line.includes('Fax:')) {
+                    fax = line.replace('Fax:', '').trim();
+                } else if (line.match(/^\d{3}[\-/]\d{3}[\-/]\d{4}/)) {
+                    // Updated regex to capture both formats
+                    phone = line.trim();
+                } else if (line.trim() && !line.includes('ATTORNEY TO BE NOTICED') && !line.includes('LEAD ATTORNEY') && !line.includes('PRO HAC VICE')) {
+                    // Only add to address parts if not already handled by '(See above)'
+                    if (firmAddress !== '(See above for address)') {
+                        firmAddressParts.push(line.trim());
+                    }
+                }
             }
+
             if (firmAddressParts.length > 0) {
-                firmAddress = firmAddressParts.join(', '); 
+                firmAddress = firmAddressParts.join(', ');
             }
-            return { party: party, partyStatus: partyStatus, name: name.trim(), firmAddress: firmAddress, phone: phone, fax: fax, email: email, terminated: terminated, unrepresented: false };
+
+            return {
+                party: party,
+                partyStatus: partyStatus,
+                name: name.trim(),
+                firmAddress: firmAddress || 'N/A',
+                phone: phone || 'N/A',
+                fax: fax || 'N/A',
+                email: email || 'N/A',
+                terminated: terminated,
+                unrepresented: false
+            };
         }
 
         function displayResults() {
