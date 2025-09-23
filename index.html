@@ -528,6 +528,7 @@
 
     <footer style="text-align: center; padding: 20px 0; font-size: 12px; color: #6c757d;">
         <p>This offering is made without any warranty, express or implied.</p>
+        <p><a href="#" onclick="showLicenseModal(); return false;" style="color: #6c757d; text-decoration: none;">View Dependency Licenses</a></p>
     </footer>
 
     <div id="helpModal" class="modal">
@@ -542,14 +543,32 @@
 
         // --- Modal Functions ---
         const modal = document.getElementById('helpModal');
+        
         function showHelpModal() {
             const content = document.getElementById('tooltipSource').innerHTML;
             document.getElementById('modal-body').innerHTML = content;
             modal.style.display = 'block';
         }
+
+        function showLicenseModal() {
+            const licenseContent = `
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">Dependency License Information</h3>
+                <p>This application uses the following third-party library:</p>
+                <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: left;">
+                    <strong style="font-size: 1.1em; color: #1e3c72;">SheetJS (xlsx.js)</strong>
+                    <p style="margin-top: 5px;">Copyright &copy; 2013-present SheetJS LLC</p>
+                    <p>Licensed under the Apache License, Version 2.0. You may obtain a copy of the license at:</p>
+                    <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener noreferrer">https://www.apache.org/licenses/LICENSE-2.0</a>
+                </div>
+            `;
+            document.getElementById('modal-body').innerHTML = licenseContent;
+            modal.style.display = 'block';
+        }
+
         function hideHelpModal() {
             modal.style.display = 'none';
         }
+
         window.onclick = function(event) {
             if (event.target == modal) {
                 hideHelpModal();
@@ -676,7 +695,8 @@
                     } else if (collectingInfo) {
                         if (isAttorneyName(line)) {
                             const lastInfoLine = attorneyInfo.length > 0 ? attorneyInfo[attorneyInfo.length - 1] : '';
-                            if (lastInfoLine.includes('ATTORNEY TO BE NOTICED') || lastInfoLine.includes('LEAD ATTORNEY') || lastInfoLine.includes('PRO HAC VICE')) {
+                            // *** THIS IS THE FIX ***
+                            if (lastInfoLine.includes('ATTORNEY TO BE NOTICED') || lastInfoLine.includes('LEAD ATTORNEY') || lastInfoLine.includes('PRO HAC VICE') || lastInfoLine.includes('TERMINATED')) {
                                 if (currentAttorney) {
                                     const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentParty, currentPartyStatus);
                                     if (attorney) parsedAttorneys.push(attorney);
@@ -741,7 +761,6 @@
                 else if (line.trim() && !line.includes('ATTORNEY TO BE NOTICED') && !line.includes('LEAD ATTORNEY') && !line.includes('PRO HAC VICE')) { firmAddressParts.push(line.trim()); }
             }
             if (firmAddressParts.length > 0) {
-                // *** THIS IS THE FIX FOR ADDRESS FORMATTING ***
                 firmAddress = firmAddressParts.join(', '); 
             }
             return { party: party, partyStatus: partyStatus, name: name.trim(), firmAddress: firmAddress, phone: phone, fax: fax, email: email, terminated: terminated, unrepresented: false };
