@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>PACER Counsel Wizard</title>
+    <meta name="description" content="Transform counsel information from U.S. District Courts into organized attorney information in the click of a button">
+    <meta name="author" content="Your Name Here"> <meta name="keywords" content="PACER, ECF, counsel, attorney, legal, docket, wizard, parser"> <meta property="og:title" content="PACER Counsel Wizard">
+    <meta property="og:description" content="Transform counsel information from U.S. District Courts into organized attorney information in the click of a button">
+    <meta property="og:image" content="https://raw.githubusercontent.com/owens4414/Pacer_Parties/main/images/EF_Add.png"> <meta property="og:url" content="https://your-website-url.com"> <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* ... your css styles continue here ... */
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
@@ -20,6 +27,45 @@
             line-height: 1.6;
             margin: 0;
         }
+        
+        /* --- MODIFIED CSS for flush, continuous layout --- */
+        .media-container {
+            display: flex;
+            gap: 0; /* Removed gap for a flush look */
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08); /* Moved shadow to the container */
+            border-radius: 20px; /* Moved radius to the container */
+            overflow: hidden; /* Important for containing the child corners */
+        }
+
+        .media-item {
+            min-width: 0;
+            display: block;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+        
+        .media-item:hover {
+            transform: scale(1.03); /* Changed hover effect to a slight zoom */
+        }
+
+        .media-item-image {
+            flex: 1;
+        }
+        .media-item-video {
+            flex: 3;
+        }
+
+        .media-item img,
+        .media-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        /* --- END MODIFIED CSS --- */
 
         .container {
             max-width: 1200px;
@@ -261,7 +307,7 @@
         
         .party-status-terminated {
             font-weight: bold;
-            color: #721c24; /* Dark red for emphasis */
+            color: #721c24; 
             margin-left: 8px;
         }
 
@@ -338,7 +384,6 @@
             font-weight: 500;
         }
         
-        /* Tooltip Styles - Forceful rules for a perfect circle */
         .tooltip-trigger {
             display: inline-flex;
             align-items: center;
@@ -363,7 +408,7 @@
         }
 
         .tooltip-content {
-            display: none; /* Content is now moved to the modal */
+            display: none; 
         }
 
         .tooltip-content strong {
@@ -391,7 +436,6 @@
             font-size: 0.85em;
         }
         
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -449,13 +493,24 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-
         @media (max-width: 768px) {
             .content { padding: 20px 15px; }
             textarea { height: 200px; }
             .button-group { flex-direction: column; }
             .stats-bar { flex-wrap: wrap; }
             .stat-item { flex: 1 1 45%; }
+            
+            /* MODIFIED: Return to stacked layout on small screens */
+            .media-container {
+                flex-direction: column;
+                gap: 20px; /* Re-introduce gap when stacked */
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .media-item {
+                border-radius: 20px; /* Give each item its own radius and shadow when stacked */
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            }
         }
         
         @media (max-width: 480px) {
@@ -466,22 +521,35 @@
     </style>
 </head>
 <body>
+    <div class="media-container">
+        <a href="https://exhibitflowapp.com" target="_blank" rel="noopener noreferrer" class="media-item media-item-image">
+            <img src="https://raw.githubusercontent.com/owens4414/Pacer_Parties/main/images/EF_Add.png" alt="ExhibitFlow Advertisement">
+        </a>
+        
+        <a href="https://exhibitflowapp.com" target="_blank" rel="noopener noreferrer" class="media-item media-item-video">
+            <video autoplay muted loop playsinline>
+                <source src="https://raw.githubusercontent.com/owens4414/Pacer_Parties/main/images/EF_Video.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </a>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>PACER Counsel Wizard</h1>
-            <p>Transform PACER docket data from District Courts into organized attorney information in Excel -- allowing you to easily track counsel and create service lists</p>
+            <p>Copy and paste counsel data from District Courts and get organized attorney/party information in an organized Excel file in return.  Use this data to create service lists and perform other case management tasks.</p>
         </div>
         
         <div class="content">
             <div class="instructions">
                 <h3>📋 Instructions</h3>
                 <ol>
-                    <li>Copy the attorney info listed on PACER from the first Plaintiff through the contact info for the last defense attorney (or some subset thereof).
+                    <li>Copy the attorney info listed on PACER from the first Plaintiff through the contact info for the last defense attorney (or some subset).
                         <span class="tooltip-container">
                             <button class="tooltip-trigger" onclick="showHelpModal()">?</button>
                             <div id="tooltipSource" class="tooltip-content">
                                 <strong>Supported Party Types</strong>
-                                <p>This script is designed to capture counsel information for the following party types:</p>
+                                <p>This script is designed to capture counsel information from U.S. District Court dockets for the following party types:</p>
                                 <ul>
                                     <li>Plaintiff</li> <li>Defendant</li> <li>Additional Defendant</li>
                                     <li>Amicus</li> <li>Applicant</li> <li>Appellant</li>
@@ -540,9 +608,8 @@
 
     <script>
         let parsedAttorneys = [];
-        let attorneyDirectory = {}; // NEW: A global object to store contact info by attorney name
+        let attorneyDirectory = {}; 
 
-        // --- Modal Functions ---
         const modal = document.getElementById('helpModal');
         
         function showHelpModal() {
@@ -576,7 +643,6 @@
             }
         }
         
-        // --- Main App Functions ---
         function parseCounselData() {
             const docketText = document.getElementById('docketText').value;
 
@@ -586,7 +652,7 @@
             }
 
             parsedAttorneys = [];
-            attorneyDirectory = {}; // NEW: Reset the directory on each parse
+            attorneyDirectory = {}; 
 
             try {
                 const normalizedText = docketText.replace(/\u00a0/g, ' ');
@@ -632,7 +698,6 @@
                                 const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentParty, currentPartyStatus);
                                 if (attorney) {
                                     parsedAttorneys.push(attorney);
-                                    // NEW: Store attorney info in the directory
                                     if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
                                         attorneyDirectory[attorney.name.toLowerCase()] = {
                                             firmAddress: attorney.firmAddress,
@@ -645,7 +710,6 @@
                             }
                         }
                         
-                        // Step 1: Assemble the full party name from one or more lines
                         const partyType = partyTypeMatch[1];
                         let partyName = partyTypeMatch[2].trim();
                         
@@ -660,7 +724,6 @@
                         let fullPartyName = partyName ? `${partyType} ${partyName}` : partyType;
                         let attorneyNameOnNextLine = '';
 
-                        // Also include any text on the "represented by" line that comes *before* it.
                         if (i + 1 < lines.length && lines[i + 1].includes('represented by')) {
                             const parts = lines[i + 1].split('represented by');
                             const beforeText = parts[0].trim();
@@ -670,7 +733,6 @@
                             }
                         }
 
-                        // Step 2: NOW check the fully assembled name for termination status
                         currentPartyStatus = 'Active';
                         const terminationPattern = /\s*TERMINATED:?.*$/i;
                         const match = fullPartyName.match(terminationPattern);
@@ -680,7 +742,6 @@
                             fullPartyName = fullPartyName.replace(terminationPattern, '').trim();
                         }
 
-                        // Step 3: Set the cleaned party name and proceed
                         currentParty = fullPartyName.trim();
 
                         if (attorneyNameOnNextLine) {
@@ -702,7 +763,6 @@
                             const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentParty, currentPartyStatus);
                             if (attorney) {
                                 parsedAttorneys.push(attorney);
-                                // NEW: Store attorney info in the directory
                                 if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
                                     attorneyDirectory[attorney.name.toLowerCase()] = {
                                         firmAddress: attorney.firmAddress,
@@ -726,7 +786,6 @@
                                     const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentParty, currentPartyStatus);
                                     if (attorney) {
                                         parsedAttorneys.push(attorney);
-                                        // NEW: Store attorney info in the directory
                                         if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
                                             attorneyDirectory[attorney.name.toLowerCase()] = {
                                                 firmAddress: attorney.firmAddress,
@@ -759,7 +818,6 @@
                         const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentParty, currentPartyStatus);
                         if (attorney) {
                             parsedAttorneys.push(attorney);
-                            // NEW: Store attorney info in the directory
                             if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
                                 attorneyDirectory[attorney.name.toLowerCase()] = {
                                     firmAddress: attorney.firmAddress,
@@ -803,7 +861,6 @@
             let terminated = false;
             let firmAddressParts = [];
             
-            // Check for "See above for address"
             const seeAbove = infoLines.some(line => line.includes('(See above'));
             
             if (seeAbove) {
@@ -831,7 +888,6 @@
                 }
             }
             
-            // Always check for TERMINATED status regardless of `seeAbove`
             if (infoLines.some(line => line.includes('TERMINATED'))) {
                 terminated = true;
             }
@@ -865,12 +921,10 @@
         }
 
         function generateExcel() {
-            // NEW: Create a set to track which attorneys have already had their full info added
             const addedAttorneys = new Set();
             const toExport = [];
 
             parsedAttorneys.forEach(attorney => {
-                // If the attorney is terminated, skip them entirely
                 if (attorney.terminated) {
                     return;
                 }
@@ -878,12 +932,9 @@
                 const attorneyNameLower = attorney.name.toLowerCase();
                 const isFirstEntry = !addedAttorneys.has(attorneyNameLower);
 
-                // Create a copy of the attorney record to avoid modifying the original parsed data
                 const attorneyForExcel = { ...attorney };
                 
                 if (isFirstEntry) {
-                    // This is the first active entry, so we need to ensure it has the full address
-                    // even if it was originally a "(See above)" reference.
                     if (attorneyForExcel.firmAddress === '(See above for address)') {
                         const fullInfo = attorneyDirectory[attorneyNameLower];
                         if (fullInfo) {
@@ -895,7 +946,6 @@
                     }
                     addedAttorneys.add(attorneyNameLower);
                 } else {
-                    // Subsequent active entries, so replace contact info with "See above"
                     attorneyForExcel.firmAddress = '(See above for address)';
                     attorneyForExcel.phone = 'N/A';
                     attorneyForExcel.fax = 'N/A';
@@ -930,7 +980,7 @@
             document.getElementById('results').innerHTML = '';
             document.getElementById('excelBtn').disabled = true;
             parsedAttorneys = [];
-            attorneyDirectory = {}; // NEW: Also clear the directory
+            attorneyDirectory = {}; 
         }
     </script>
 </body>
