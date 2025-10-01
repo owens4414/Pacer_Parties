@@ -619,10 +619,10 @@
 
     <script>
         let parsedAttorneys = [];
-        let attorneyDirectory = {}; 
+        let attorneyDirectory = {};
 
         const modal = document.getElementById('helpModal');
-        
+
         function showHelpModal() {
             const content = document.getElementById('tooltipSource').innerHTML;
             document.getElementById('modal-body').innerHTML = content;
@@ -630,30 +630,30 @@
         }
 
         function showLicenseModal() {
-                    const licenseContent = `
-                        <h3 style="color: #2c3e50; margin-bottom: 20px;">License Info</h3>
-                        <p>This application uses the following third-party library:</p>
-                        <pre style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: left; overflow-x: auto;">
-        SheetJS Community Edition -- https://sheetjs.com/
+            const licenseContent = `
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">License Info</h3>
+                <p>This application uses the following third-party library:</p>
+                <pre style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: left; overflow-x: auto;">
+SheetJS Community Edition -- https://sheetjs.com/
 
-        Copyright (C) 2012-present   SheetJS LLC
+Copyright (C) 2012-present   SheetJS LLC
 
-        Licensed under the Apache License, Version 2.0 (the "License");
-        you may not use this file except in compliance with the License.
-        You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-            http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
-        Unless required by applicable law or agreed to in writing, software
-        distributed under the License is distributed on an "AS IS" BASIS,
-        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        See the License for the specific language governing permissions and
-        limitations under the License.
-        </pre>
-                    `;
-                    document.getElementById('modal-body').innerHTML = licenseContent;
-                    modal.style.display = 'block';
-                }
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</pre>
+            `;
+            document.getElementById('modal-body').innerHTML = licenseContent;
+            modal.style.display = 'block';
+        }
 
         function hideHelpModal() {
             modal.style.display = 'none';
@@ -664,17 +664,16 @@
                 hideHelpModal();
             }
         }
-        
+
         function parseCounselData() {
             const docketText = document.getElementById('docketText').value;
-
             if (!docketText.trim()) {
                 alert('Please paste ECF docket text first.');
                 return;
             }
 
             parsedAttorneys = [];
-            attorneyDirectory = {}; 
+            attorneyDirectory = {};
 
             try {
                 const normalizedText = docketText.replace(/\u00a0/g, ' ');
@@ -692,7 +691,8 @@
                 ];
                 const partyTypeRegex = new RegExp(`^(${partyTypes.join('|')})(.*)`, 'i');
 
-                let currentParty = '';
+                let currentPartyType = '';
+                let currentPartyName = '';
                 let currentPartyStatus = 'Active';
                 let currentAttorney = '';
                 let attorneyInfo = [];
@@ -709,15 +709,17 @@
                     const partyTypeMatch = line.match(partyTypeRegex);
 
                     if (partyTypeMatch) {
-                        if (currentParty) {
+                        if (currentPartyName) {
                             if (isUnrepresented) {
                                 parsedAttorneys.push({
-                                    party: currentParty, partyStatus: currentPartyStatus,
+                                    partyType: currentPartyType,
+                                    partyName: currentPartyName,
+                                    partyStatus: currentPartyStatus,
                                     name: '', firmAddress: '', phone: '', fax: '', email: '',
                                     terminated: false, unrepresented: true
                                 });
                             } else if (currentAttorney && collectingInfo) {
-                                const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentParty, currentPartyStatus);
+                                const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
                                 if (attorney) {
                                     parsedAttorneys.push(attorney);
                                     if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
@@ -732,39 +734,37 @@
                             }
                         }
                         
-                        const partyType = partyTypeMatch[1];
-                        let partyName = partyTypeMatch[2].trim();
+                        currentPartyType = partyTypeMatch[1];
+                        let partyNameBuilder = partyTypeMatch[2].trim();
                         
                         let nextLineIndex = i + 1;
                         while (nextLineIndex < lines.length && !lines[nextLineIndex].includes('represented by') && !lines[nextLineIndex].match(partyTypeRegex)) {
                             if (lines[nextLineIndex] === 'V.') break;
-                            partyName += ` ${lines[nextLineIndex]}`;
+                            partyNameBuilder += ` ${lines[nextLineIndex]}`;
                             i = nextLineIndex;
                             nextLineIndex++;
                         }
                         
-                        let fullPartyName = partyName ? `${partyType} ${partyName}` : partyType;
                         let attorneyNameOnNextLine = '';
-
                         if (i + 1 < lines.length && lines[i + 1].includes('represented by')) {
                             const parts = lines[i + 1].split('represented by');
                             const beforeText = parts[0].trim();
                             attorneyNameOnNextLine = parts[1].trim();
                             if (beforeText) {
-                                fullPartyName += ` ${beforeText}`;
+                                partyNameBuilder += ` ${beforeText}`;
                             }
                         }
 
                         currentPartyStatus = 'Active';
                         const terminationPattern = /\s*TERMINATED:?.*$/i;
-                        const match = fullPartyName.match(terminationPattern);
+                        const match = partyNameBuilder.match(terminationPattern);
                         
                         if (match) {
                             currentPartyStatus = 'Terminated';
-                            fullPartyName = fullPartyName.replace(terminationPattern, '').trim();
+                            currentPartyName = partyNameBuilder.replace(terminationPattern, '').trim();
+                        } else {
+                            currentPartyName = partyNameBuilder.trim();
                         }
-
-                        currentParty = fullPartyName.trim();
 
                         if (attorneyNameOnNextLine) {
                             currentAttorney = attorneyNameOnNextLine;
@@ -779,10 +779,10 @@
                             isUnrepresented = true;
                         }
 
-                    } else if (line.includes('represented by') && currentParty) {
+                    } else if (line.includes('represented by') && currentPartyName) {
                         isUnrepresented = false;
                         if (currentAttorney && collectingInfo) {
-                            const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentParty, currentPartyStatus);
+                            const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
                             if (attorney) {
                                 parsedAttorneys.push(attorney);
                                 if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
@@ -805,7 +805,7 @@
                             const lastInfoLine = attorneyInfo.length > 0 ? attorneyInfo[attorneyInfo.length - 1] : '';
                             if (lastInfoLine.includes('ATTORNEY TO BE NOTICED') || lastInfoLine.includes('LEAD ATTORNEY') || lastInfoLine.includes('PRO HAC VICE') || lastInfoLine.includes('TERMINATED')) {
                                 if (currentAttorney) {
-                                    const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentParty, currentPartyStatus);
+                                    const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
                                     if (attorney) {
                                         parsedAttorneys.push(attorney);
                                         if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
@@ -829,15 +829,17 @@
                     }
                 }
 
-                if (currentParty) {
+                if (currentPartyName) {
                     if (isUnrepresented) {
                         parsedAttorneys.push({
-                            party: currentParty, partyStatus: currentPartyStatus,
+                            partyType: currentPartyType,
+                            partyName: currentPartyName,
+                            partyStatus: currentPartyStatus,
                             name: '', firmAddress: '', phone: '', fax: '', email: '',
                             terminated: false, unrepresented: true
                         });
                     } else if (currentAttorney && collectingInfo) {
-                        const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentParty, currentPartyStatus);
+                        const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
                         if (attorney) {
                             parsedAttorneys.push(attorney);
                             if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
@@ -861,7 +863,6 @@
             }
         }
 
-
         function isAttorneyName(line) {
             if (!line || line.trim() === '') return false;
             const normalizedLine = line.replace(/\s*,\s*/g, ', ').trim();
@@ -875,7 +876,7 @@
             return true;
         }
 
-        function buildAttorneyRecord(name, infoLines, party, partyStatus) {
+        function buildAttorneyRecord(name, infoLines, partyType, partyName, partyStatus) {
             let firmAddress = '';
             let phone = '';
             let fax = '';
@@ -915,7 +916,8 @@
             }
 
             return {
-                party: party,
+                partyType: partyType,
+                partyName: partyName,
                 partyStatus: partyStatus,
                 name: name.trim(),
                 firmAddress: firmAddress || 'N/A',
@@ -937,7 +939,7 @@
             parsedAttorneys.forEach((attorney, index) => {
                 const isUnrepresented = attorney.unrepresented || (!attorney.name || attorney.name.trim() === '');
                 const isPartyTerminated = attorney.partyStatus === 'Terminated';
-                html += `<div class="attorney-card"><div class="attorney-name">${attorney.name || '[Unrepresented Party]'}</div><div class="party-name">${attorney.party}${isPartyTerminated ? '<span class="party-status-terminated">(Terminated Party)</span>' : ''}</div><div class="contact-info">${!isUnrepresented ? `<div><strong>Firm/Address:</strong> ${attorney.firmAddress || 'N/A'}</div><div><strong>Phone:</strong> ${attorney.phone || 'N/A'}</div><div><strong>Fax:</strong> ${attorney.fax || 'N/A'}</div><div><strong>Email:</strong> ${attorney.email || 'N/A'}</div>` : '<em>No attorney of record</em>'}</div>${isUnrepresented ? '<span class="status unrepresented">UNREPRESENTED</span>' : `<span class="status ${attorney.terminated ? 'terminated' : 'active'}">${attorney.terminated ? 'ATTORNEY TERMINATED' : 'ATTORNEY ACTIVE'}</span>`}</div>`;
+                html += `<div class="attorney-card"><div class="attorney-name">${attorney.name || '[Unrepresented Party]'}</div><div class="party-name">${attorney.partyType} ${attorney.partyName}${isPartyTerminated ? '<span class="party-status-terminated">(Terminated Party)</span>' : ''}</div><div class="contact-info">${!isUnrepresented ? `<div><strong>Firm/Address:</strong> ${attorney.firmAddress || 'N/A'}</div><div><strong>Phone:</strong> ${attorney.phone || 'N/A'}</div><div><strong>Fax:</strong> ${attorney.fax || 'N/A'}</div><div><strong>Email:</strong> ${attorney.email || 'N/A'}</div>` : '<em>No attorney of record</em>'}</div>${isUnrepresented ? '<span class="status unrepresented">UNREPRESENTED</span>' : `<span class="status ${attorney.terminated ? 'terminated' : 'active'}">${attorney.terminated ? 'ATTORNEY TERMINATED' : 'ATTORNEY ACTIVE'}</span>`}</div>`;
             });
             resultsDiv.innerHTML = html;
         }
@@ -983,8 +985,20 @@
             }
             
             const wb = XLSX.utils.book_new();
-            const wsData = [['Party', 'Party Status', 'Attorney Name', 'Firm/Address', 'Phone', 'Fax', 'Email', 'Attorney Status']];
-            toExport.forEach(attorney => { wsData.push([attorney.party, attorney.partyStatus, attorney.name || '[Unrepresented]', attorney.firmAddress || '', attorney.phone || '', attorney.fax || '', attorney.email || '', attorney.unrepresented ? 'Unrepresented' : 'Active']); });
+            const wsData = [['Party Type', 'Party Name', 'Party Status', 'Attorney Name', 'Firm/Address', 'Phone', 'Fax', 'Email', 'Attorney Status']];
+            toExport.forEach(attorney => { 
+                wsData.push([
+                    attorney.partyType, 
+                    attorney.partyName, 
+                    attorney.partyStatus, 
+                    attorney.name || '[Unrepresented]', 
+                    attorney.firmAddress || '', 
+                    attorney.phone || '', 
+                    attorney.fax || '', 
+                    attorney.email || '', 
+                    attorney.unrepresented ? 'Unrepresented' : 'Active'
+                ]); 
+            });
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             const colWidths = [];
             wsData.forEach(row => { row.forEach((cell, i) => { const cellLength = String(cell).length; colWidths[i] = Math.max(colWidths[i] || 10, cellLength + 2); }); });
