@@ -9,9 +9,7 @@
     <meta name="author" content="Your Name Here"> <meta name="keywords" content="PACER, ECF, counsel, attorney, legal, docket, wizard, parser"> <meta property="og:title" content="PACER Counsel Wizard">
     <meta property="og:description" content="Transform counsel information from U.S. District Courts into organized attorney information in the click of a button">
     <meta property="og:image" content="https://raw.githubusercontent.com/owens4414/Pacer_Parties/main/images/EF_Add.png"> <meta property="og:url" content="https://your-website-url.com"> <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        /* ... your css styles continue here ... */
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -29,62 +27,41 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+            background: #f0f2f5;
             min-height: 100vh;
             padding: 20px;
             line-height: 1.6;
             margin: 0;
         }
         
-        /* --- MODIFIED CSS for flush, continuous layout --- */
-        .media-container {
-            display: flex;
-            gap: 0; /* Removed gap for a flush look */
+        .page-wrapper {
             max-width: 1200px;
             width: 100%;
-            margin: 0 auto 20px auto;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08); /* Moved shadow to the container */
-            border-radius: 20px; /* Moved radius to the container */
-            overflow: hidden; /* Important for containing the child corners */
-        }
-
-        .media-item {
-            min-width: 0;
-            display: block;
-            text-decoration: none;
-            transition: transform 0.3s ease;
+            margin: 0 auto;
         }
         
-        .media-item:hover {
-            transform: scale(1.03); /* Changed hover effect to a slight zoom */
+        .home-link {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: #5a6472;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
         }
-
-        .media-item-image {
-            flex: 1;
+        
+        .home-link:hover {
+            color: #1e3c72;
         }
-        .media-item-video {
-            flex: 3;
-        }
-
-        .media-item img,
-        .media-item video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        /* --- END MODIFIED CSS --- */
-
+        
         .container {
             max-width: 1200px;
             width: 100%;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+            background: #ffffff;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .header {
@@ -507,18 +484,6 @@
             .button-group { flex-direction: column; }
             .stats-bar { flex-wrap: wrap; }
             .stat-item { flex: 1 1 45%; }
-            
-            /* MODIFIED: Return to stacked layout on small screens */
-            .media-container {
-                flex-direction: column;
-                gap: 20px; /* Re-introduce gap when stacked */
-                border-radius: 0;
-                box-shadow: none;
-            }
-            .media-item {
-                border-radius: 20px; /* Give each item its own radius and shadow when stacked */
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-            }
         }
         
         @media (max-width: 480px) {
@@ -531,77 +496,66 @@
         async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
-<!--     
-    <div class="media-container">
-        <a href="https://exhibitflowapp.com" target="_blank" rel="noopener noreferrer" class="media-item media-item-image">
-            <img src="https://raw.githubusercontent.com/owens4414/Pacer_Parties/main/images/EF_Add.png" alt="ExhibitFlow Advertisement">
-        </a>
-        
-        <a href="https://exhibitflowapp.com" target="_blank" rel="noopener noreferrer" class="media-item media-item-video">
-            <video autoplay muted loop playsinline>
-                <source src="https://raw.githubusercontent.com/owens4414/Pacer_Parties/main/images/EF_Video.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </a>
-    </div>
--->
-    <div class="container">
-        <div class="header">
-            <h1>PACER Counsel Wizard</h1>
-            <p>This webapp allows you to copy and paste counsel data from U.S. District Courts and get organized attorney/party information in a formatted Excel file in return.  You can then use this data to create service lists/emails lists and perform other case management tasks with ease.</p>
-        </div>
-        
-        <div class="content">
-            <div class="instructions">
-                <h3>📋 Instructions</h3>
-                <ol>
-                    <li>Copy the attorney info listed on PACER from the first Plaintiff through the contact info for the last defense attorney (or some subset).
-                        <span class="tooltip-container">
-                            <button class="tooltip-trigger" onclick="showHelpModal()">?</button>
-                            <div id="tooltipSource" class="tooltip-content">
-                                <strong>Supported Party Types</strong>
-                                <p>This script is designed to capture counsel information from U.S. District Court dockets for the following party types:</p>
-                                <ul>
-                                    <li>Plaintiff</li> <li>Defendant</li> <li>Additional Defendant</li>
-                                    <li>Amicus</li> <li>Applicant</li> <li>Appellant</li>
-                                    <li>Appellee</li> <li>Counter Claimant</li> <li>Counterclaimant</li>
-                                    <li>Counter Defendant</li> <li>Counterclaim Defendant</li> <li>Garnishee</li>
-                                    <li>In Re</li> <li>Interested Party</li> <li>Intervenor</li>
-                                    <li>Material Witness</li> <li>Mediator</li> <li>Movant</li>
-                                    <li>Nominal Defendant</li> <li>Objector</li> <li>Petitioner</li>
-                                    <li>Respondent</li> <li>Special Master</li> <li>Third Party Defendant</li>
-                                    <li>Thirdparty Defendant</li> <li>Third Party Plaintiff</li> <li>Thirdparty Plaintiff</li>
-                                </ul>
-                            </div>
-                        </span>
-                    </li>
-                    <li>Paste it into the text area below (make sure it's all there -- copying text from PACER can be finicky).</li>
-                    <li>Click "Parse Counsel Data" to extract attorney information.</li>
-                    <li>Review the parsed data, then click "Generate Excel File" to download the contact info. The Excel file will be a filterable table which makes it easy to create email service lists, etc.</li>
-                </ol>
-                <div class="note">
-                    <strong>📝 Note:</strong> The Excel file will include all parties (represented and unrepresented) except for terminated attorneys (i.e., those who have withdrawn their appearance). Terminated *parties* will be included and noted.
+    <div class="page-wrapper">
+        <a href="../" class="home-link">← Back to Home</a>
+        <div class="container">
+            <div class="header">
+                <h1>PACER Counsel Wizard</h1>
+                <p>This webapp allows you to copy and paste counsel data from U.S. District Courts and get organized attorney/party information in a formatted Excel file in return.  You can then use this data to create service lists/emails lists and perform other case management tasks with ease.</p>
+            </div>
+            
+            <div class="content">
+                <div class="instructions">
+                    <h3>📋 Instructions</h3>
+                    <ol>
+                        <li>Copy the attorney info listed on PACER from the first Plaintiff through the contact info for the last defense attorney (or some subset).
+                            <span class="tooltip-container">
+                                <button class="tooltip-trigger" onclick="showHelpModal()">?</button>
+                                <div id="tooltipSource" class="tooltip-content">
+                                    <strong>Supported Party Types</strong>
+                                    <p>This script is designed to capture counsel information from U.S. District Court dockets for the following party types:</p>
+                                    <ul>
+                                        <li>Plaintiff</li> <li>Defendant</li> <li>Additional Defendant</li>
+                                        <li>Amicus</li> <li>Applicant</li> <li>Appellant</li>
+                                        <li>Appellee</li> <li>Counter Claimant</li> <li>Counterclaimant</li>
+                                        <li>Counter Defendant</li> <li>Counterclaim Defendant</li> <li>Garnishee</li>
+                                        <li>In Re</li> <li>Interested Party</li> <li>Intervenor</li>
+                                        <li>Material Witness</li> <li>Mediator</li> <li>Movant</li>
+                                        <li>Nominal Defendant</li> <li>Objector</li> <li>Petitioner</li>
+                                        <li>Respondent</li> <li>Special Master</li> <li>Third Party Defendant</li>
+                                        <li>Thirdparty Defendant</li> <li>Third Party Plaintiff</li> <li>Thirdparty Plaintiff</li>
+                                    </ul>
+                                </div>
+                            </span>
+                        </li>
+                        <li>Paste it into the text area below (make sure it's all there -- copying text from PACER can be finicky).</li>
+                        <li>Click "Parse Counsel Data" to extract attorney information.</li>
+                        <li>Review the parsed data, then click "Generate Excel File" to download the contact info. The Excel file will be a filterable table which makes it easy to create email service lists, etc.</li>
+                    </ol>
+                    <div class="note">
+                        <strong>📝 Note:</strong> The Excel file will include all parties (represented and unrepresented) except for terminated attorneys (i.e., those who have withdrawn their appearance). Terminated *parties* will be included and noted.
+                    </div>
                 </div>
-            </div>
 
-            <div class="input-section">
-                <label for="docketText">📄 Paste ECF Docket Text Here:</label>
-                <textarea id="docketText" placeholder="Paste your ECF docket information here..."></textarea>
-            </div>
+                <div class="input-section">
+                    <label for="docketText">📄 Paste ECF Docket Text Here:</label>
+                    <textarea id="docketText" placeholder="Paste your ECF docket information here..."></textarea>
+                </div>
 
-            <div class="button-group">
-                <button onclick="parseCounselData()">
-                    🔍 Parse Counsel Data
-                </button>
-                <button id="excelBtn" onclick="generateExcel()" disabled>
-                    📊 Generate Excel File
-                </button>
-                <button class="secondary" onclick="clearData()">
-                    🗑️ Clear All
-                </button>
-            </div>
+                <div class="button-group">
+                    <button onclick="parseCounselData()">
+                        🔍 Parse Counsel Data
+                    </button>
+                    <button id="excelBtn" onclick="generateExcel()" disabled>
+                        📊 Generate Excel File
+                    </button>
+                    <button class="secondary" onclick="clearData()">
+                        🗑️ Clear All
+                    </button>
+                </div>
 
-            <div id="results" class="results"></div>
+                <div id="results" class="results"></div>
+            </div>
         </div>
     </div>
 
