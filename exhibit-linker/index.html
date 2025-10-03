@@ -32,177 +32,374 @@
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --primary-color: #1e3c72;
+            --secondary-color: #4a90e2;
+            --background-color: #f7f8fc;
+            --text-color: #333d4b;
+            --heading-color: #1d2b48;
+            --card-background: #ffffff;
+            --border-color: #e8eaf0;
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8f9fa;
-            line-height: 1.7;
+            background-color: var(--background-color);
+            line-height: 1.6;
             margin: 0;
-            padding: 20px;
-            color: #495057;
+            color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        .container {
-            max-width: 900px;
-            width: 100%;
+        .page-wrapper {
+            max-width: 1100px;
             margin: 0 auto;
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-            border: 1px solid #e9ecef;
+            padding: 0 20px;
         }
 
-        .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        .navbar {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--heading-color);
+            text-decoration: none;
+        }
+        
+        .home-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .home-link:hover {
+            color: var(--secondary-color);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--heading-color);
+            margin: 0 0 15px 0;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 650px;
+            margin: 0 auto 30px auto;
+            color: #5a6472;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: var(--primary-color);
             color: white;
-            padding: 40px;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(30, 60, 114, 0.2);
+        }
+
+        .section {
+            padding: 60px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-header h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--heading-color);
+            margin: 0 0 10px 0;
+        }
+        
+        .section-header p {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            color: #5a6472;
+        }
+        
+        .features-grid, .tips-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+        
+        .feature-card, .tip-card {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            flex: 0 1 320px; /* Controls sizing and centering */
+        }
+        
+        .feature-card:hover, .tip-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+        }
+
+        .feature-card h3, .tip-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--heading-color);
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .feature-card ul {
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        .feature-card li {
+            padding-left: 0;
+            position: relative;
+            padding-left: 22px;
+            margin-bottom: 5px;
+        }
+        
+        .feature-card li::before {
+            content: '✓';
+            color: var(--secondary-color);
+            position: absolute;
+            left: 0;
+            font-weight: 600;
+        }
+        
+        .tip-card {
             text-align: center;
         }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0 0 10px 0;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
         
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            font-weight: 300;
-            max-width: 700px;
+        .tip-card p {
+            margin: 0;
+            color: #495057;
+        }
+
+        .workflow-container {
+            background: var(--card-background);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .details-container {
+            background: var(--card-background);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            max-width: 800px;
             margin: 0 auto;
         }
 
-        .content {
-            padding: 40px;
-        }
-
-        .home-link {
-            display: inline-block;
-            margin-bottom: 30px;
+        .details-container p {
+            margin-bottom: 1em;
             color: #495057;
-            text-decoration: none;
-            opacity: 0.8;
-            transition: opacity 0.3s ease;
-            font-weight: 600;
-        }
-        .home-link:hover {
-            opacity: 1;
         }
 
-        h2, h3 {
-            color: #2c3e50;
-            font-weight: 600;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: .4em;
-            margin-top: 24px;
-            margin-bottom: 20px;
-        }
-        h2 { font-size: 1.8rem; }
-        h3 { font-size: 1.4rem; }
-        
-        ul {
-            padding-left: 20px;
-            list-style-type: '✓  ';
-        }
-        
-        li {
-            margin-bottom: 8px;
-            padding-left: 8px;
-        }
-
-        code {
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-            background-color: #e9ecef;
-            color: #343a40;
-            padding: .2em .4em;
-            margin: 0;
-            font-size: 85%;
-            border-radius: 6px;
+        .details-container p:last-child {
+            margin-bottom: 0;
         }
 
         .mermaid {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
             text-align: center;
-            margin-top: 25px;
         }
+        
+        code {
+            background-color: #e8eaf0;
+            color: #444;
+            padding: .2em .4em;
+            border-radius: 4px;
+            font-size: 85%;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 60px;
+            color: #8892a0;
+            font-size: 0.9rem;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h1>🔗 Exhibit Linker</h1>
-            <p>A free Windows app that automatically creates relative hyperlinks for exhibit citations in Word and Excel. Simplify hyperlink creation and ensure your links work, even when files are moved.</p>
-        </div>
-        
-        <div class="content">
+    <div class="page-wrapper">
+        <nav class="navbar">
+            <a href="/" class="logo">LegalTech Tools</a>
             <a href="/" class="home-link">← Back to Main Page</a>
-            <h2>Overview (APP COMING SOON)</h2>
-            <p>File hyperlinking is helpful for submitting legal memoranda, investigative reports, and other documents where you want the recipient to have instantaneous access to the files cited in your work product.</p>
-            <p>Exhibit Linker is a Windows application that allows users to select a Word or Excel file and then automatically create relative links to exhibits or Bates-stamped documents. The script reads your document, locates exhibit or Bates citations, uses regex to find the cited documents in a user-designed folder, and then creates relatively linked Word/Excel and PDF output files.</p>
-            <p>As long as your exhibits are in the same folder as your PDF or are otherwise in the same relative position (e.g., the parent PDF in one folder and exhibits in a given subfolder), the linking in the output PDF or Excel will work. Even if the PDF and exhibits are moved elsewhere on your hard drive or to another PC (e.g., via email), so long as the exhibits travel with it in the same relative position, the linking will work.</p>
-            <p>The script can also employ pattern matching to determine the page number in a legal citation (e.g., <code>Ex. 99, Memo, at p. 9</code>) and link to the cited page of the operative PDF exhibit. Further, Bates citations will open the operative PDF even if the cited page is mid-document (e.g., if <code>SMITH_005</code> is found within <code>SMITH_003.pdf</code>, it will link to that file) and, if the output PDF is opened in Chrome, the link will even open to the correct Bates-stamped page. So, in the <code>SMITH_005</code> example, the link would open a Chrome window to page 3 of that PDF.</p>
+        </nav>
 
-            <h2>🔄 How It Works</h2>
-            <p>The script intelligently matches various citation file name formats and processes your documents to ensure maximum compatibility and functionality.</p>
+        <main>
+            <section class="hero">
+                <h1>The Smart Way to Link Exhibits.</h1>
+                <p>Exhibit Linker is a free Windows app that automatically creates relative hyperlinks for citations in Word & Excel. Simplify hyperlink creation and ensure your links work, anywhere.</p>
+                <a href="#" class="cta-button">Download for Windows (COMING SOON)</a>
+            </section>
+
+            <section class="section features-section">
+                 <div class="section-header">
+                    <h2>Powerful Features, Effortless Workflow</h2>
+                    <p>Our script intelligently matches various citation formats and processes your documents to ensure maximum compatibility and functionality.</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.82a1 1 0 0 0-1.42 0l-1.06 1.06a1 1 0 0 0 0 1.42l1.06 1.06a1 1 0 0 0 1.42 0l1.06-1.06a1 1 0 0 0 0-1.42z"/><path d="m2.01 22 4.99-5"/><path d="m14.53 9.47 1.06-1.06a1 1 0 0 0-1.42-1.42l-1.06 1.06a1 1 0 0 0 0 1.42z"/><path d="M12.5 11.5 10 14"/><path d="M17 11.5a6 6 0 1 1-11 2.5"/><path d="M12.5 11.5 10 14"/><path d="m14.53 9.47 1.06-1.06a1 1 0 0 0-1.42-1.42l-1.06 1.06a1 1 0 0 0 0 1.42z"/></svg>
+                            Smart Matching
+                        </h3>
+                        <ul>
+                           <li><strong>Exhibit References</strong>: <code>Ex. 1</code>, <code>Exhibit A</code></li>
+                           <li><strong>Bates Numbers</strong>: <code>SMITH_001</code>, <code>CASE_A_123</code></li>
+                           <li><strong>Page-Specific</strong>: Opens to exact page in PDFs (Chrome-compatible).</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+                            File Processing
+                        </h3>
+                         <ul>
+                            <li><strong>Relative Links</strong>: Work across different computers.</li>
+                            <li><strong>Chrome Optimization</strong>: Direct page navigation in Chrome.</li>
+                            <li><strong>Filename Sanitization</strong>: Replaces spaces/periods for compatibility.</li>
+                            <li><strong>Relative Paths</strong>: Maintains links when files are moved.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
             
-            <h3>Step-by-Step Workflow</h3>
-            <div class="mermaid">
-                graph TD
-                    A[📄 Select Input Document] --> B[Word/Excel File]
-                    B --> C[🔍 Scan for Citations]
-                    C --> D[Exhibit References Found]
-                    C --> E[Bates Numbers Found]
-                    D --> F[📁 Search Document Folder]
-                    E --> F
-                    F --> G[🎯 Match Files with Citations]
-                    G --> H[🔗 Create relative Links]
-                    H --> I[📊 Generate Output Files]
-                    I --> J[📑 Linked PDF]
-                    I --> K[📈 Linked Excel]
-                    I --> L[📝 Linked Word Doc]
-            </div>
+            <section class="section workflow-section">
+                <div class="section-header">
+                    <h2>How It Works</h2>
+                    <p>A simple, automated process from start to finish.</p>
+                </div>
+                <div class="workflow-container">
+                    <div class="mermaid">
+                        graph TD
+                            A[📄 Select Input Document] --> B[Word/Excel File]
+                            B --> C[🔍 Scan for Citations]
+                            C --> D[Exhibit References Found]
+                            C --> E[Bates Numbers Found]
+                            D --> F[📁 Search Document Folder]
+                            E --> F
+                            F --> G[🎯 Match Files with Citations]
+                            G --> H[🔗 Create relative Links]
+                            H --> I[📊 Generate Output Files]
+                            I --> J[📑 Linked PDF]
+                            I --> K[📈 Linked Excel]
+                            I --> L[📝 Linked Word Doc]
+                    </div>
+                </div>
+            </section>
+            
+            <section class="section">
+                <div class="section-header">
+                    <h2>In-Depth Overview</h2>
+                </div>
+                <div class="details-container">
+                    <p>File hyperlinking is helpful for submitting legal memoranda, investigative reports, and other documents where you want the recipient to have instantaneous access to the files cited in your work product.</p>
+                    <p>Exhibit Linker is a Windows application that allows users to select a Word or Excel file and then automatically create relative links to exhibits or Bates-stamped documents. The script reads your document, locates exhibit or Bates citations, uses regex to find the cited documents in a user-designed folder, and then creates relatively linked Word/Excel and PDF output files.</p>
+                    <p>As long as your exhibits are in the same folder as your PDF or are otherwise in the same relative position (e.g., the parent PDF in one folder and exhibits in a given subfolder), the linking in the output PDF or Excel will work. Even if the PDF and exhibits are moved elsewhere on your hard drive or to another PC (e.g., via email), so long as the exhibits travel with it in the same relative position, the linking will work.</p>
+                    <p>The script can also employ pattern matching to determine the page number in a legal citation (e.g., <code>Ex. 99, Memo, at p. 9</code>) and link to the cited page of the operative PDF exhibit. Further, Bates citations will open the operative PDF even if the cited page is mid-document (e.g., if <code>SMITH_005</code> is found within <code>SMITH_003.pdf</code>, it will link to that file) and, if the output PDF is opened in Chrome, the link will even open to the correct Bates-stamped page. So, in the <code>SMITH_005</code> example, the link would open a Chrome window to page 3 of that PDF.</p>
+                </div>
+            </section>
+            
+            <section class="section">
+                 <div class="section-header">
+                    <h2>Pro Tips for Success</h2>
+                 </div>
+                 <div class="tips-grid">
+                     <div class="tip-card">
+                         <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                             Close Applications
+                         </h3>
+                         <p>Ensure that Word and Excel are closed before running the script to prevent any conflicts.</p>
+                     </div>
+                     <div class="tip-card">
+                         <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                             Save Location
+                        </h3>
+                         <p>Save your output files to the same folder as the original Word/Excel file for best results.</p>
+                     </div>
+                     <div class="tip-card">
+                         <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                             Easy Sharing
+                         </h3>
+                         <p>Zip your resulting files and folders together when sending to others for easy, reliable transport.</p>
+                     </div>
+                     <div class="tip-card">
+                        <h3>
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                            Proper Exit
+                        </h3>
+                        <p>Always close the app using the "x" button to preserve original Word settings.</p>
+                    </div>
+                 </div>
+            </section>
 
-            <h3>🎯 Smart Matching</h3>
-            <ul>
-                <li><strong>Exhibit References</strong>: <code>Ex. 1</code>, <code>Exhibit A</code></li>
-                <li><strong>Bates Numbers</strong>: <code>SMITH_001</code>, <code>CASE_A_123</code></li>
-                <li><strong>Page-Specific</strong>: Opens to exact page within PDFs (Chrome-compatible).</li>
-            </ul>
-
-            <h3>🔧 File Processing</h3>
-            <ul>
-                <li><strong>Relative Links</strong>: Work across different computers and locations.</li>
-                <li><strong>Chrome Optimization</strong>: Direct page navigation in Chrome browser.</li>
-                <li><strong>Filename Sanitization</strong>: Replaces spaces/periods with underscores for compatibility.</li>
-                <li><strong>Relative Paths</strong>: Maintains links when files are moved together.</li>
-            </ul>
-
-            <h2>💡 Pro Tips</h2>
-            <ul>
-                <li>Ensure that Word and Excel are closed before running the script.</li>
-                <li>Save your output files to the same folder as the original Word/Excel file.</li>
-                <li>Always close the app using the "x" button to preserve original Word settings.</li>
-                <li>Zip your resulting files if sending to others for easy transport.</li>
-            </ul>
-        </div>
+        </main>
+        
+        <footer class="footer">
+            <p>&copy; 2024 LegalTech Tools. All Rights Reserved.</p>
+        </footer>
     </div>
 
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        mermaid.initialize({ startOnLoad: true });
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                'primaryColor': '#f7f8fc',
+                'primaryTextColor': '#333',
+                'lineColor': '#4a90e2',
+                'textColor': '#333',
+                'fontSize': '16px'
+            }
+        });
     </script>
 
 </body>
 </html>
+
+
+
 
 
