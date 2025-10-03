@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>Exhibit Linker - Automated Hyperlinking for Legal Documents</title>
-    <meta name="description" content="Discover Exhibit Linker, a Windows app that automatically creates relative hyperlinks for citations in Word and Excel, streamlining e-brief creation.">
+    <meta name="description" content="Discover Exhibit Linker, a Windows app that automatically creates relative hyperlinks for citations in Word and Excel, streamlining hyperlink creation.">
     <meta name="author" content="Your Name Here">
-    <meta name="keywords" content="exhibit linking, legal tech, document automation, relative hyperlinks, Word, Excel, e-brief">
+    <meta name="keywords" content="exhibit linking, legal tech, document automation, relative hyperlinks, Word, Excel, hyperlink">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -29,184 +29,180 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#2a5298">
-    <meta name="msapplication-TileColor" content="#2a5298">
-    <meta name="theme-color" content="#1e3c72">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
     <style>
-        :root {
-            --background-start: #1e3c72;
-            --background-end: #2a5298;
-            --card-background: rgba(255, 255, 255, 0.1);
-            --text-color: #ffffff;
-            --shadow-color: rgba(0, 0, 0, 0.2);
-            --border-color: rgba(255, 255, 255, 0.2);
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
             line-height: 1.7;
-            color: var(--text-color);
             margin: 0;
-            padding: 40px 20px;
-            min-height: 100vh;
-            background: linear-gradient(-45deg, #1e3c72, #2a5298, #1e3c72, #2a5298);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            overflow-x: hidden;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            padding: 20px;
+            color: #495057;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
+            width: 100%;
             margin: 0 auto;
-            background: var(--card-background);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            padding: 25px 40px 40px 40px;
+            background: #ffffff;
             border-radius: 20px;
-            box-shadow: 0 8px 32px 0 var(--shadow-color);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .content {
+            padding: 40px;
         }
 
         .home-link {
             display: inline-block;
             margin-bottom: 30px;
-            color: var(--text-color);
+            color: #495057;
             text-decoration: none;
             opacity: 0.8;
             transition: opacity 0.3s ease;
+            font-weight: 600;
         }
         .home-link:hover {
             opacity: 1;
         }
 
-        h1, h2, h3 {
-            border-bottom: 1px solid var(--border-color);
+        h2, h3 {
+            color: #2c3e50;
+            font-weight: 600;
+            border-bottom: 2px solid #e9ecef;
             padding-bottom: .4em;
             margin-top: 24px;
-            margin-bottom: 16px;
-            font-weight: 600;
+            margin-bottom: 20px;
         }
-        h1 { font-size: 2.2em; text-shadow: 0 2px 8px var(--shadow-color); }
-        h2 { font-size: 1.6em; }
-        h3 { font-size: 1.3em; }
-
-        p, li {
-            opacity: 0.9;
-            font-weight: 300;
-        }
+        h2 { font-size: 1.8rem; }
+        h3 { font-size: 1.4rem; }
         
         ul {
             padding-left: 20px;
+            list-style-type: '✓  ';
+        }
+        
+        li {
+            margin-bottom: 8px;
+            padding-left: 8px;
         }
 
         code {
             font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: #e9ecef;
+            color: #343a40;
             padding: .2em .4em;
             margin: 0;
             font-size: 85%;
             border-radius: 6px;
         }
-        pre {
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 6px;
-            padding: 16px;
-            overflow: auto;
-            border: 1px solid var(--border-color);
-        }
-        pre code {
-            padding: 0;
-            margin: 0;
-            font-size: 100%;
-            background-color: transparent;
-            border: none;
-        }
+
         .mermaid {
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: #f8f9fa;
             padding: 20px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
             text-align: center;
+            margin-top: 25px;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <a href="/" class="home-link">← Back to Home</a>
-        <h1>Exhibit Linker</h1>
-
-        <h2>Overview (APP COMING SOON)</h2>
-        <p>File hyperlinking is helpful for submitting legal memoranda, investigative reports, and other documents where you want the recipient to have instantaneous access to the files cited in your work product.</p>
-        <p>Exhibit Linker is a Windows application that allows users to select a Word or Excel file and then automatically create relative links to exhibits or Bates-stamped documents. The script reads your document, locates exhibit or Bates citations, uses regex to find the cited documents in a user-designed folder, and then creates relatively linked Word/Excel and PDF output files.</p>
-        <p>As long as your exhibits are in the same folder as your PDF or are otherwise in the same relative position (e.g., the parent PDF in one folder and exhibits in a given subfolder), the linking in the output PDF or Excel will work. Even if the PDF and exhibits are moved elsewhere on your hard drive or to another PC (e.g., via email), so long as the exhibits travel with it in the same relative position, the linking will work.</p>
-        <p>The script can also employ pattern matching to determine the page number in a legal citation (e.g., <code>Ex. 99, Memo, at p. 9</code>) and link to the cited page of the operative PDF exhibit. Further, Bates citations will open the operative PDF even if the cited page is mid-document (e.g., if <code>SMITH_005</code> is found within <code>SMITH_003.pdf</code>, it will link to that file) and, if the output PDF is opened in Chrome, the link will even open to the correct Bates-stamped page. So, in the <code>SMITH_005</code> example, the link would open a Chrome window to page 3 of that PDF.</p>
-        <p>If your "parent" document and exhibits are in the same folder and the end user will use Chrome to open your PDF, it is best that the linked documents lack spacing and periods in their filenames. This is not an issue with this script. It is an inherent limitation of Chrome's ability to interpret hyperlinks for certain local files. Given that issue, this script can automatically modify the linked files' names accordingly (if the user chooses) by swapping in underscores (e.g. <code>Ex. 1 Memo.pdf</code> becomes <code>Ex_1_Memo.pdf</code>). That way you can ensure Chrome compatibility if you prefer. If your exhibits are in a separate subfolder or your end user will not use Chrome or a similar browser as a PDF viewer, such processing should be unnecessary.</p>
-
-        <h2>🔄 How It Works</h2>
-        <h3>Step-by-Step Workflow</h3>
-        <div class="mermaid">
-            graph TD
-                A[📄 Select Input Document] --> B[Word/Excel File]
-                B --> C[🔍 Scan for Citations]
-                C --> D[Exhibit References Found]
-                C --> E[Bates Numbers Found]
-                D --> F[📁 Search Document Folder]
-                E --> F
-                F --> G[🎯 Match Files with Citations]
-                G --> H[🔗 Create relative Links]
-                H --> I[📊 Generate Output Files]
-                I --> J[📑 Linked PDF]
-                I --> K[📈 Linked Excel]
-                I --> L[📝 Linked Word Doc]
+        <div class="header">
+            <h1>🔗 Exhibit Linker</h1>
+            <p>A free Windows app that automatically creates relative hyperlinks for exhibit citations in Word and Excel. Simplify hyperlink creation and ensure your links work, even when files are moved.</p>
         </div>
+        
+        <div class="content">
+            <a href="/" class="home-link">← Back to Main Page</a>
+            <h2>Overview</h2>
+            <p>File hyperlinking is helpful for submitting legal memoranda, investigative reports, and other documents where you want the recipient to have instantaneous access to the files cited in your work product.</p>
+            <p>Exhibit Linker is a Windows application that allows users to select a Word or Excel file and then automatically create relative links to exhibits or Bates-stamped documents. The script reads your document, locates exhibit or Bates citations, uses regex to find the cited documents in a user-designed folder, and then creates relatively linked Word/Excel and PDF output files.</p>
+            <p>As long as your exhibits are in the same folder as your PDF or are otherwise in the same relative position (e.g., the parent PDF in one folder and exhibits in a given subfolder), the linking in the output PDF or Excel will work. Even if the PDF and exhibits are moved elsewhere on your hard drive or to another PC (e.g., via email), so long as the exhibits travel with it in the same relative position, the linking will work.</p>
+            <p>The script can also employ pattern matching to determine the page number in a legal citation (e.g., <code>Ex. 99, Memo, at p. 9</code>) and link to the cited page of the operative PDF exhibit. Further, Bates citations will open the operative PDF even if the cited page is mid-document (e.g., if <code>SMITH_005</code> is found within <code>SMITH_003.pdf</code>, it will link to that file) and, if the output PDF is opened in Chrome, the link will even open to the correct Bates-stamped page. So, in the <code>SMITH_005</code> example, the link would open a Chrome window to page 3 of that PDF.</p>
 
-        <h3>🎯 Smart Matching</h3>
-        <p>The script intelligently matches various citation file name formats:</p>
-        <ul>
-            <li><strong>Exhibit References</strong>: <code>Ex. 1</code>, <code>Exhibit A</code></li>
-            <li><strong>Bates Numbers</strong>: <code>SMITH_001</code>, <code>CASE_A_123</code></li>
-            <li><strong>Page-Specific</strong>: Opens to exact page within PDFs (if PDF is viewed via Chrome -- Adobe, however, will open the file to first page of the relevant PDF).</li>
-        </ul>
+            <h2>🔄 How It Works</h2>
+            <p>The script intelligently matches various citation file name formats and processes your documents to ensure maximum compatibility and functionality.</p>
+            
+            <h3>Step-by-Step Workflow</h3>
+            <div class="mermaid">
+                graph TD
+                    A[📄 Select Input Document] --> B[Word/Excel File]
+                    B --> C[🔍 Scan for Citations]
+                    C --> D[Exhibit References Found]
+                    C --> E[Bates Numbers Found]
+                    D --> F[📁 Search Document Folder]
+                    E --> F
+                    F --> G[🎯 Match Files with Citations]
+                    G --> H[🔗 Create relative Links]
+                    H --> I[📊 Generate Output Files]
+                    I --> J[📑 Linked PDF]
+                    I --> K[📈 Linked Excel]
+                    I --> L[📝 Linked Word Doc]
+            </div>
 
-        <h3>🔧 File Processing</h3>
-        <ul>
-            <li><strong>✅ Relative Links</strong>: Work across different computers</li>
-            <li><strong>📱 Chrome Optimization</strong>: Direct page navigation in Chrome browser</li>
-            <li><strong>🔄 Filename Sanitization</strong>: Replace spaces/periods with underscores for compatibility (optional)</li>
-            <li><strong>📂 Relative Paths</strong>: Maintain links when files are moved together</li>
-        </ul>
+            <h3>🎯 Smart Matching</h3>
+            <ul>
+                <li><strong>Exhibit References</strong>: <code>Ex. 1</code>, <code>Exhibit A</code></li>
+                <li><strong>Bates Numbers</strong>: <code>SMITH_001</code>, <code>CASE_A_123</code></li>
+                <li><strong>Page-Specific</strong>: Opens to exact page within PDFs (Chrome-compatible).</li>
+            </ul>
 
-        <h2>Tips</h2>
-        <ul>
-            <li>Ensure that Word and Excel are closed before running the script.</li>
-            <li>Save your output files to the same folder as the original Word/Excel file.</li>
-            <li>Always close the app by clicking the "x" button at the top right of the window. This will ensure that your original Word settings are not altered.</li>
-            <li>Zip your resulting files if sending to others for easy transport.</li>
-        </ul>
+            <h3>🔧 File Processing</h3>
+            <ul>
+                <li><strong>Relative Links</strong>: Work across different computers and locations.</li>
+                <li><strong>Chrome Optimization</strong>: Direct page navigation in Chrome browser.</li>
+                <li><strong>Filename Sanitization</strong>: Replaces spaces/periods with underscores for compatibility.</li>
+                <li><strong>Relative Paths</strong>: Maintains links when files are moved together.</li>
+            </ul>
+
+            <h2>💡 Pro Tips</h2>
+            <ul>
+                <li>Ensure that Word and Excel are closed before running the script.</li>
+                <li>Save your output files to the same folder as the original Word/Excel file.</li>
+                <li>Always close the app using the "x" button to preserve original Word settings.</li>
+                <li>Zip your resulting files if sending to others for easy transport.</li>
+            </ul>
+        </div>
     </div>
-
 
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: {
-            'background': 'transparent',
-            'primaryColor': '#2a5298',
-            'primaryTextColor': '#ffffff',
-            'lineColor': '#a9b7d1',
-            'textColor': '#ffffff'
-        }});
+        mermaid.initialize({ startOnLoad: true });
     </script>
 
 </body>
 </html>
+
 
