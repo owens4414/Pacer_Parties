@@ -81,10 +81,72 @@
             font-size: 1.1rem;
             opacity: 0.9;
             font-weight: 300;
+            margin-top: 1em; /* <-- Add this line */
         }
 
         .content {
             padding: 40px;
+        }
+
+        .mode-switcher {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
         }
 
         .instructions {
@@ -500,12 +562,23 @@
         <div class="container">
             <div class="header">
                 <h1>PACER Counsel Wizard</h1>
-                <p>This free webapp allows you to copy and paste counsel data from U.S. District Courts and get organized attorney/party information in a formatted Excel file in return.  This app thus allows you to easily create service lists/emails lists and perform other case management tasks with ease.  No more extracting attorney information from the docket one-by-one.</p>
+                <p>This free webapp allows you to copy and paste counsel data from U.S. District Courts and get organized attorney/party information in a formatted Excel file in return.  This app thus allows you to easily create service lists/emails lists and perform other case management tasks with ease.  No more extracting attorney information from the docket one-by-one.</p> 
+                <p> </p>
+                <p> Choose DOCKET MODE if you are taking the information from the docket itself and EMAIL MODE if you are creating a service list from an ECF notice email (the latter will only include email addresses as that is what is included on ECF notices and may include additional email addresses not on the docket insofar as the ECF notice includes supplemental email addresses like those for a paralegal associated with a given attorney).</p>
             </div>
             
             <div class="content">
-                <div class="instructions">
-                    <h3>📋 Instructions</h3>
+                <div class="mode-switcher">
+                    <span>Docket Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="modeToggle" onchange="toggleMode()">
+                        <span class="slider round"></span>
+                    </label>
+                    <span>Email Notice Mode</span>
+                </div>
+
+                <div class="instructions" id="instructionsDocket">
+                    <h3>📋 Instructions for Docket Mode</h3>
                     <ol>
                         <li>Copy the attorney info listed on PACER from the first Plaintiff through the contact info for the last defense attorney (or some subset).
                             <span class="tooltip-container">
@@ -536,8 +609,18 @@
                     </div>
                 </div>
 
+                <div class="instructions" id="instructionsEmail" style="display:none;">
+                    <h3>📧 Instructions for Email Notice Mode</h3>
+                    <ol>
+                        <li>Copy the list of attorneys and their email addresses. Attorneys with `(terminated)` in their name will be ignored.</li>
+                        <li>Paste it into the text area below. The expected format for each line is: <code>Attorney Name      email1@domain.com, email2@domain.com</code></li>
+                        <li>Click "Parse Counsel Data" to extract the names and emails.</li>
+                        <li>Review the parsed data, then click "Generate Excel File" to download. The Excel file will have the attorney name in the first column and a comma-separated list of all their emails in the second column.</li>
+                    </ol>
+                </div>
+
                 <div class="input-section">
-                    <label for="docketText">📄 Paste ECF Docket Text Here:</label>
+                    <label for="docketText">📄 Paste Text Here:</label>
                     <textarea id="docketText" placeholder="Paste your ECF docket information here..."></textarea>
                 </div>
 
@@ -573,9 +656,12 @@
     <script>
         let parsedAttorneys = [];
         let attorneyDirectory = {};
+        let parsedEmails = [];
+        let currentMode = 'docket';
 
         const modal = document.getElementById('helpModal');
 
+        // --- Modal and UI Functions ---
         function showHelpModal() {
             const content = document.getElementById('tooltipSource').innerHTML;
             document.getElementById('modal-body').innerHTML = content;
@@ -618,204 +704,177 @@ limitations under the License.
             }
         }
 
+        function toggleMode() {
+            const toggle = document.getElementById('modeToggle');
+            const docketInstructions = document.getElementById('instructionsDocket');
+            const emailInstructions = document.getElementById('instructionsEmail');
+            const docketTextarea = document.getElementById('docketText');
+
+            if (toggle.checked) {
+                currentMode = 'email';
+                docketInstructions.style.display = 'none';
+                emailInstructions.style.display = 'block';
+                docketTextarea.placeholder = 'Paste your attorney email list here...\ne.g., John Smith    jsmith@law.com, jsmith2@law.com';
+            } else {
+                currentMode = 'docket';
+                docketInstructions.style.display = 'block';
+                emailInstructions.style.display = 'none';
+                docketTextarea.placeholder = 'Paste your ECF docket information here...';
+            }
+            clearData();
+        }
+
+        // --- Core Logic ---
         function parseCounselData() {
             const docketText = document.getElementById('docketText').value;
             if (!docketText.trim()) {
-                alert('Please paste ECF docket text first.');
+                alert('Please paste some text first.');
                 return;
             }
 
+            // Clear previous results before parsing
             parsedAttorneys = [];
             attorneyDirectory = {};
+            parsedEmails = [];
 
             try {
-                const normalizedText = docketText.replace(/\u00a0/g, ' ');
-                const lines = normalizedText.split('\n').map(line => line.trim()).filter(line => line);
-
-                const partyTypes = [
-                    'Plaintiff', 'Defendant', 'Additional Defendant', 'Respondent', 'Movant',
-                    'Petitioner', 'Applicant', 'Intervenor', 'Appellant', 'Appellee', 'Special Master',
-                    'Third Party Defendant', 'Mediator', 'Amicus', 'Material Witness', 'Counterclaimant',
-                    'Counter Claimant', 'Counterclaim Defendant', 'Counter Defendant', 'Interested Party',
-                    'Nominal Defendant', 'Objector', 'Petitioner',
-                    'Respondent', 'Special Master', 'Third Party Defendant',
-                    'Thirdparty Defendant', 'Third Party Plaintiff', 'Thirdparty Plaintiff',
-                    'In Re', 'Garnishee'
-                ];
-                const partyTypeRegex = new RegExp(`^(${partyTypes.join('|')})(.*)`, 'i');
-
-                let currentPartyType = '';
-                let currentPartyName = '';
-                let currentPartyStatus = 'Active';
-                let currentAttorney = '';
-                let attorneyInfo = [];
-                let collectingInfo = false;
-                let isUnrepresented = false;
-
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i];
-
-                    if (line === 'V.') {
-                        continue;
-                    }
-
-                    const partyTypeMatch = line.match(partyTypeRegex);
-
-                    if (partyTypeMatch) {
-                        if (currentPartyName) {
-                            if (isUnrepresented) {
-                                parsedAttorneys.push({
-                                    partyType: currentPartyType,
-                                    partyName: currentPartyName,
-                                    partyStatus: currentPartyStatus,
-                                    name: '', firmAddress: '', phone: '', fax: '', email: '',
-                                    terminated: false, unrepresented: true
-                                });
-                            } else if (currentAttorney && collectingInfo) {
-                                const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
-                                if (attorney) {
-                                    parsedAttorneys.push(attorney);
-                                    if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
-                                        attorneyDirectory[attorney.name.toLowerCase()] = {
-                                            firmAddress: attorney.firmAddress,
-                                            phone: attorney.phone,
-                                            fax: attorney.fax,
-                                            email: attorney.email
-                                        };
-                                    }
-                                }
-                            }
-                        }
-                        
-                        currentPartyType = partyTypeMatch[1];
-                        let partyNameBuilder = partyTypeMatch[2].trim();
-                        
-                        let nextLineIndex = i + 1;
-                        while (nextLineIndex < lines.length && !lines[nextLineIndex].includes('represented by') && !lines[nextLineIndex].match(partyTypeRegex)) {
-                            if (lines[nextLineIndex] === 'V.') break;
-                            partyNameBuilder += ` ${lines[nextLineIndex]}`;
-                            i = nextLineIndex;
-                            nextLineIndex++;
-                        }
-                        
-                        let attorneyNameOnNextLine = '';
-                        if (i + 1 < lines.length && lines[i + 1].includes('represented by')) {
-                            const parts = lines[i + 1].split('represented by');
-                            const beforeText = parts[0].trim();
-                            attorneyNameOnNextLine = parts[1].trim();
-                            if (beforeText) {
-                                partyNameBuilder += ` ${beforeText}`;
-                            }
-                        }
-
-                        currentPartyStatus = 'Active';
-                        const terminationPattern = /\s*TERMINATED:?.*$/i;
-                        const match = partyNameBuilder.match(terminationPattern);
-                        
-                        if (match) {
-                            currentPartyStatus = 'Terminated';
-                            currentPartyName = partyNameBuilder.replace(terminationPattern, '').trim();
-                        } else {
-                            currentPartyName = partyNameBuilder.trim();
-                        }
-
-                        if (attorneyNameOnNextLine) {
-                            currentAttorney = attorneyNameOnNextLine;
-                            isUnrepresented = false;
-                            attorneyInfo = [];
-                            collectingInfo = true;
-                            i++;
-                        } else {
-                            currentAttorney = '';
-                            attorneyInfo = [];
-                            collectingInfo = false;
-                            isUnrepresented = true;
-                        }
-
-                    } else if (line.includes('represented by') && currentPartyName) {
-                        isUnrepresented = false;
-                        if (currentAttorney && collectingInfo) {
-                            const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
-                            if (attorney) {
-                                parsedAttorneys.push(attorney);
-                                if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
-                                    attorneyDirectory[attorney.name.toLowerCase()] = {
-                                        firmAddress: attorney.firmAddress,
-                                        phone: attorney.phone,
-                                        fax: attorney.fax,
-                                        email: attorney.email
-                                    };
-                                }
-                            }
-                        }
-                        const parts = line.split('represented by');
-                        currentAttorney = parts[1].trim();
-                        attorneyInfo = [];
-                        collectingInfo = true;
-
-                    } else if (collectingInfo) {
-                        if (isAttorneyName(line)) {
-                            const lastInfoLine = attorneyInfo.length > 0 ? attorneyInfo[attorneyInfo.length - 1] : '';
-                            if (lastInfoLine.includes('ATTORNEY TO BE NOTICED') || lastInfoLine.includes('LEAD ATTORNEY') || lastInfoLine.includes('PRO HAC VICE') || lastInfoLine.includes('TERMINATED')) {
-                                if (currentAttorney) {
-                                    const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
-                                    if (attorney) {
-                                        parsedAttorneys.push(attorney);
-                                        if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
-                                            attorneyDirectory[attorney.name.toLowerCase()] = {
-                                                firmAddress: attorney.firmAddress,
-                                                phone: attorney.phone,
-                                                fax: attorney.fax,
-                                                email: attorney.email
-                                            };
-                                        }
-                                    }
-                                }
-                                currentAttorney = line;
-                                attorneyInfo = [];
-                            } else {
-                                attorneyInfo.push(line);
-                            }
-                        } else {
-                            attorneyInfo.push(line);
-                        }
-                    }
-                }
-
-                if (currentPartyName) {
-                    if (isUnrepresented) {
-                        parsedAttorneys.push({
-                            partyType: currentPartyType,
-                            partyName: currentPartyName,
-                            partyStatus: currentPartyStatus,
-                            name: '', firmAddress: '', phone: '', fax: '', email: '',
-                            terminated: false, unrepresented: true
-                        });
-                    } else if (currentAttorney && collectingInfo) {
-                        const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
-                        if (attorney) {
-                            parsedAttorneys.push(attorney);
-                            if (attorney.firmAddress && attorney.firmAddress !== '(See above for address)') {
-                                attorneyDirectory[attorney.name.toLowerCase()] = {
-                                    firmAddress: attorney.firmAddress,
-                                    phone: attorney.phone,
-                                    fax: attorney.fax,
-                                    email: attorney.email
-                                };
-                            }
-                        }
-                    }
+                if (currentMode === 'docket') {
+                    parseDocketMode(docketText);
+                } else {
+                    parseEmailMode(docketText);
                 }
 
                 displayResults();
-                document.getElementById('excelBtn').disabled = parsedAttorneys.length === 0;
-
+                const hasResults = (currentMode === 'docket' && parsedAttorneys.length > 0) || (currentMode === 'email' && parsedEmails.length > 0);
+                document.getElementById('excelBtn').disabled = !hasResults;
             } catch (error) {
-                document.getElementById('results').innerHTML = `<div style="color: #e74c3c; padding: 20px; background: #fdf2f2; border-radius: 12px; border: 1px solid #ffc1cc;">⚠️ Error parsing docket text: ${error.message}</div>`;
+                document.getElementById('results').innerHTML = `<div style="color: #e74c3c; padding: 20px; background: #fdf2f2; border-radius: 12px; border: 1px solid #ffc1cc;">⚠️ Error parsing text: ${error.message}</div>`;
                 console.error("Parsing error:", error);
             }
         }
 
+        function displayResults() {
+            if (currentMode === 'docket') {
+                displayDocketResults();
+            } else {
+                displayEmailResults();
+            }
+        }
+
+        function generateExcel() {
+            if (currentMode === 'docket') {
+                generateDocketExcel();
+            } else {
+                generateEmailExcel();
+            }
+        }
+
+        function clearData() {
+            document.getElementById('docketText').value = '';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('excelBtn').disabled = true;
+            parsedAttorneys = [];
+            attorneyDirectory = {};
+            parsedEmails = [];
+        }
+
+        // --- Docket Mode Specific Functions ---
+        function parseDocketMode(docketText) {
+            const normalizedText = docketText.replace(/\u00a0/g, ' ');
+            const lines = normalizedText.split('\n').map(line => line.trim()).filter(line => line);
+            const partyTypes = [
+                'Plaintiff', 'Defendant', 'Additional Defendant', 'Respondent', 'Movant',
+                'Petitioner', 'Applicant', 'Intervenor', 'Appellant', 'Appellee', 'Special Master',
+                'Third Party Defendant', 'Mediator', 'Amicus', 'Material Witness', 'Counterclaimant',
+                'Counter Claimant', 'Counterclaim Defendant', 'Counter Defendant', 'Interested Party',
+                'Nominal Defendant', 'Objector', 'Thirdparty Defendant', 'Third Party Plaintiff', 'Thirdparty Plaintiff',
+                'In Re', 'Garnishee'
+            ];
+            const partyTypeRegex = new RegExp(`^(${partyTypes.join('|')})(.*)`, 'i');
+            let currentPartyType = '', currentPartyName = '', currentPartyStatus = 'Active';
+            let currentAttorney = '', attorneyInfo = [], collectingInfo = false, isUnrepresented = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                if (line === 'V.') continue;
+
+                const partyTypeMatch = line.match(partyTypeRegex);
+                if (partyTypeMatch) {
+                    if (currentPartyName) {
+                        if (isUnrepresented) {
+                            parsedAttorneys.push({ partyType: currentPartyType, partyName: currentPartyName, partyStatus: currentPartyStatus, name: '', firmAddress: '', phone: '', fax: '', email: '', terminated: false, unrepresented: true });
+                        } else if (currentAttorney && collectingInfo) {
+                            const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
+                            if (attorney) parsedAttorneys.push(attorney);
+                        }
+                    }
+                    currentPartyType = partyTypeMatch[1];
+                    let partyNameBuilder = partyTypeMatch[2].trim();
+                    let nextLineIndex = i + 1;
+                    while (nextLineIndex < lines.length && !lines[nextLineIndex].includes('represented by') && !lines[nextLineIndex].match(partyTypeRegex)) {
+                        if (lines[nextLineIndex] === 'V.') break;
+                        partyNameBuilder += ` ${lines[nextLineIndex]}`;
+                        i = nextLineIndex++;
+                    }
+                    let attorneyNameOnNextLine = '';
+                    if (i + 1 < lines.length && lines[i + 1].includes('represented by')) {
+                        const parts = lines[i + 1].split('represented by');
+                        if (parts[0].trim()) partyNameBuilder += ` ${parts[0].trim()}`;
+                        attorneyNameOnNextLine = parts[1].trim();
+                    }
+                    const terminationPattern = /\s*TERMINATED:?.*$/i;
+                    const match = partyNameBuilder.match(terminationPattern);
+                    currentPartyStatus = match ? 'Terminated' : 'Active';
+                    currentPartyName = partyNameBuilder.replace(terminationPattern, '').trim();
+                    if (attorneyNameOnNextLine) {
+                        currentAttorney = attorneyNameOnNextLine;
+                        isUnrepresented = false;
+                        attorneyInfo = [];
+                        collectingInfo = true;
+                        i++;
+                    } else {
+                        currentAttorney = '';
+                        attorneyInfo = [];
+                        collectingInfo = false;
+                        isUnrepresented = true;
+                    }
+                } else if (line.includes('represented by') && currentPartyName) {
+                    isUnrepresented = false;
+                    if (currentAttorney && collectingInfo) {
+                        const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
+                        if (attorney) parsedAttorneys.push(attorney);
+                    }
+                    currentAttorney = line.split('represented by')[1].trim();
+                    attorneyInfo = [];
+                    collectingInfo = true;
+                } else if (collectingInfo) {
+                    if (isAttorneyName(line)) {
+                        const lastInfoLine = attorneyInfo.length > 0 ? attorneyInfo[attorneyInfo.length - 1] : '';
+                        if (lastInfoLine.includes('ATTORNEY TO BE NOTICED') || lastInfoLine.includes('LEAD ATTORNEY') || lastInfoLine.includes('PRO HAC VICE') || lastInfoLine.includes('TERMINATED')) {
+                            if (currentAttorney) {
+                                const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
+                                if (attorney) parsedAttorneys.push(attorney);
+                            }
+                            currentAttorney = line;
+                            attorneyInfo = [];
+                        } else {
+                            attorneyInfo.push(line);
+                        }
+                    } else {
+                        attorneyInfo.push(line);
+                    }
+                }
+            }
+            if (currentPartyName) {
+                if (isUnrepresented) {
+                    parsedAttorneys.push({ partyType: currentPartyType, partyName: currentPartyName, partyStatus: currentPartyStatus, name: '', firmAddress: '', phone: '', fax: '', email: '', terminated: false, unrepresented: true });
+                } else if (currentAttorney && collectingInfo) {
+                    const attorney = buildAttorneyRecord(currentAttorney, attorneyInfo, currentPartyType, currentPartyName, currentPartyStatus);
+                    if (attorney) parsedAttorneys.push(attorney);
+                }
+            }
+        }
+        
         function isAttorneyName(line) {
             if (!line || line.trim() === '') return false;
             const normalizedLine = line.replace(/\s*,\s*/g, ', ').trim();
@@ -830,66 +889,39 @@ limitations under the License.
         }
 
         function buildAttorneyRecord(name, infoLines, partyType, partyName, partyStatus) {
-            let firmAddress = '';
-            let phone = '';
-            let fax = '';
-            let email = '';
-            let terminated = false;
-            let firmAddressParts = [];
-            
-            const seeAbove = infoLines.some(line => line.includes('(See above'));
-            
-            if (seeAbove) {
+            let firmAddress = '', phone = '', fax = '', email = '', terminated = false, firmAddressParts = [];
+            if (infoLines.some(line => line.includes('(See above'))) {
                 firmAddress = '(See above for address)';
             } else {
                 for (const line of infoLines) {
-                    if (line.includes('TERMINATED')) {
-                        terminated = true;
-                    } else if (line.includes('@')) {
+                    if (line.includes('TERMINATED')) terminated = true;
+                    else if (line.includes('@')) {
                         const emailMatch = line.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-                        if (emailMatch) {
-                            email = emailMatch[1];
-                        }
-                    } else if (line.includes('Fax:')) {
-                        fax = line.replace('Fax:', '').trim();
-                    } else if (line.match(/^\d{3}[\-/]\d{3}[\-/]\d{4}/)) {
-                        phone = line.trim();
-                    } else if (line.trim() && !line.includes('ATTORNEY TO BE NOTICED') && !line.includes('LEAD ATTORNEY') && !line.includes('PRO HAC VICE')) {
+                        if (emailMatch) email = emailMatch[1];
+                    } else if (line.includes('Fax:')) fax = line.replace('Fax:', '').trim();
+                    else if (line.match(/^\d{3}[\-/]\d{3}[\-/]\d{4}/)) phone = line.trim();
+                    else if (line.trim() && !line.includes('ATTORNEY TO BE NOTICED') && !line.includes('LEAD ATTORNEY') && !line.includes('PRO HAC VICE')) {
                         firmAddressParts.push(line.trim());
                     }
                 }
-                
-                if (firmAddressParts.length > 0) {
-                    firmAddress = firmAddressParts.join(', ');
-                }
+                if (firmAddressParts.length > 0) firmAddress = firmAddressParts.join(', ');
             }
-            
-            if (infoLines.some(line => line.includes('TERMINATED'))) {
-                terminated = true;
+            if (infoLines.some(line => line.includes('TERMINATED'))) terminated = true;
+            const record = { partyType, partyName, partyStatus, name: name.trim(), firmAddress: firmAddress || '', phone: phone || '', fax: fax || '', email: email || '', terminated, unrepresented: false };
+            if (record.firmAddress && record.firmAddress !== '(See above for address)') {
+                attorneyDirectory[record.name.toLowerCase()] = { firmAddress: record.firmAddress, phone: record.phone, fax: record.fax, email: record.email };
             }
-
-            return {
-                partyType: partyType,
-                partyName: partyName,
-                partyStatus: partyStatus,
-                name: name.trim(),
-                firmAddress: firmAddress || '',
-                phone: phone || '',
-                fax: fax || '',
-                email: email || '',
-                terminated: terminated,
-                unrepresented: false
-            };
+            return record;
         }
 
-        function displayResults() {
+        function displayDocketResults() {
             const resultsDiv = document.getElementById('results');
             if (parsedAttorneys.length === 0) { resultsDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #6c757d;">🔭 No attorneys found in the pasted text.</div>'; return; }
             const activeCount = parsedAttorneys.filter(a => !a.terminated && !a.unrepresented).length;
             const terminatedCount = parsedAttorneys.filter(a => a.terminated).length;
             const unrepresentedCount = parsedAttorneys.filter(a => a.unrepresented).length;
             let html = `<h3>📊 Parsed Results</h3><div class="stats-bar"><div class="stat-item"><div class="stat-number">${parsedAttorneys.length}</div><div class="stat-label">Total Entries</div></div><div class="stat-item"><div class="stat-number">${activeCount}</div><div class="stat-label">Active EOAs</div></div><div class="stat-item"><div class="stat-number">${unrepresentedCount}</div><div class="stat-label">Unrepresented</div></div><div class="stat-item"><div class="stat-number">${terminatedCount}</div><div class="stat-label">Terminated EOAs</div></div></div>`;
-            parsedAttorneys.forEach((attorney, index) => {
+            parsedAttorneys.forEach((attorney) => {
                 const isUnrepresented = attorney.unrepresented || (!attorney.name || attorney.name.trim() === '');
                 const isPartyTerminated = attorney.partyStatus === 'Terminated';
                 html += `<div class="attorney-card"><div class="attorney-name">${attorney.name || '[Unrepresented Party]'}</div><div class="party-name">${attorney.partyType} ${attorney.partyName}${isPartyTerminated ? '<span class="party-status-terminated">(Terminated Party)</span>' : ''}</div><div class="contact-info">${!isUnrepresented ? `<div><strong>Firm/Address:</strong> ${attorney.firmAddress || 'N/A'}</div><div><strong>Phone:</strong> ${attorney.phone || 'N/A'}</div><div><strong>Fax:</strong> ${attorney.fax || 'N/A'}</div><div><strong>Email:</strong> ${attorney.email || 'N/A'}</div>` : '<em>No attorney of record</em>'}</div>${isUnrepresented ? '<span class="status unrepresented">UNREPRESENTED</span>' : `<span class="status ${attorney.terminated ? 'terminated' : 'active'}">${attorney.terminated ? 'ATTORNEY TERMINATED' : 'ATTORNEY ACTIVE'}</span>`}</div>`;
@@ -897,79 +929,98 @@ limitations under the License.
             resultsDiv.innerHTML = html;
         }
 
-        function generateExcel() {
+        function generateDocketExcel() {
             const addedAttorneys = new Set();
             const toExport = [];
-
             parsedAttorneys.forEach(attorney => {
-                if (attorney.terminated) {
-                    return;
-                }
-
+                if (attorney.terminated) return;
                 const attorneyNameLower = attorney.name.toLowerCase();
                 const isFirstEntry = !addedAttorneys.has(attorneyNameLower);
-
                 const attorneyForExcel = { ...attorney };
-                
                 if (isFirstEntry) {
                     if (attorneyForExcel.firmAddress === '(See above for address)') {
                         const fullInfo = attorneyDirectory[attorneyNameLower];
-                        if (fullInfo) {
-                            attorneyForExcel.firmAddress = fullInfo.firmAddress;
-                            attorneyForExcel.phone = fullInfo.phone;
-                            attorneyForExcel.fax = fullInfo.fax;
-                            attorneyForExcel.email = fullInfo.email;
-                        }
+                        if (fullInfo) { Object.assign(attorneyForExcel, fullInfo); }
                     }
-                    addedAttorneys.add(attorneyNameLower);
+                    if(attorney.name) addedAttorneys.add(attorneyNameLower);
                 } else {
-                    attorneyForExcel.firmAddress = '(See above for address)';
-                    attorneyForExcel.phone = '';
-                    attorneyForExcel.fax = '';
-                    attorneyForExcel.email = '';
+                    Object.assign(attorneyForExcel, { firmAddress: '(See above for address)', phone: '', fax: '', email: '' });
                 }
-
                 toExport.push(attorneyForExcel);
             });
 
-            if (toExport.length === 0) { 
-                alert('No active EOAs or unrepresented parties to export.');
-                return;
-            }
-            
+            if (toExport.length === 0) { alert('No active EOAs or unrepresented parties to export.'); return; }
             const wb = XLSX.utils.book_new();
             const wsData = [['Party Type', 'Party Name', 'Party Status', 'Attorney Name', 'Firm/Address', 'Phone', 'Fax', 'Email', 'Attorney Status']];
-            toExport.forEach(attorney => { 
-                wsData.push([
-                    attorney.partyType, 
-                    attorney.partyName, 
-                    attorney.partyStatus, 
-                    attorney.name || '[Unrepresented]', 
-                    attorney.firmAddress || '', 
-                    attorney.phone || '', 
-                    attorney.fax || '', 
-                    attorney.email || '', 
-                    attorney.unrepresented ? 'Unrepresented' : 'Active'
-                ]); 
-            });
+            toExport.forEach(attorney => { wsData.push([attorney.partyType, attorney.partyName, attorney.partyStatus, attorney.name || '[Unrepresented]', attorney.firmAddress || '', attorney.phone || '', attorney.fax || '', attorney.email || '', attorney.unrepresented ? 'Unrepresented' : 'Active']); });
             const ws = XLSX.utils.aoa_to_sheet(wsData);
-            const colWidths = [];
-            wsData.forEach(row => { row.forEach((cell, i) => { const cellLength = String(cell).length; colWidths[i] = Math.max(colWidths[i] || 10, cellLength + 2); }); });
-            ws['!cols'] = colWidths.map(w => ({width: Math.min(w, 50)}));
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
+            const colWidths = wsData[0].map((_, i) => ({ width: wsData.reduce((w, r) => Math.max(w, String(r[i]).length), 10) + 2 }));
+            ws['!cols'] = colWidths.map(w => ({width: Math.min(w.width, 50)}));
+            ws['!autofilter'] = { ref: XLSX.utils.encode_range(XLSX.utils.decode_range(ws['!ref'])) };
             XLSX.utils.book_append_sheet(wb, ws, "Counsel List");
-            const today = new Date();
-            const dateStr = today.toISOString().split('T')[0];
+            const dateStr = new Date().toISOString().split('T')[0];
             XLSX.writeFile(wb, `ECF_Counsel_${dateStr}.xlsx`);
         }
 
-        function clearData() {
-            document.getElementById('docketText').value = '';
-            document.getElementById('results').innerHTML = '';
-            document.getElementById('excelBtn').disabled = true;
-            parsedAttorneys = [];
-            attorneyDirectory = {}; 
+        // --- Email Notice Mode Specific Functions ---
+        function parseEmailMode(docketText) {
+            const normalizedText = docketText.replace(/\u00a0/g, ' ');
+            const lines = normalizedText.split('\n').filter(line => line.trim() !== '');
+
+            parsedEmails = lines.map(line => {
+                const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+                const match = line.match(emailRegex);
+                if (!match) return null;
+
+                const firstEmailIndex = match.index;
+                const name = line.substring(0, firstEmailIndex).trim();
+                const emailString = line.substring(firstEmailIndex).trim();
+                const emails = emailString.split(/[\s,]+/).filter(email => email.trim() !== '' && email.includes('@'));
+
+                return { name, emails };
+            })
+            .filter(item => item !== null && item.emails.length > 0)
+            .filter(item => !item.name.toLowerCase().includes('(terminated)'));
+        }
+
+        function displayEmailResults() {
+            const resultsDiv = document.getElementById('results');
+            if (parsedEmails.length === 0) {
+                resultsDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #6c757d;">🔭 No valid attorney/email entries found.</div>';
+                return;
+            }
+
+            let html = `<h3>📧 Parsed Email List</h3><div class="stats-bar"><div class="stat-item"><div class="stat-number">${parsedEmails.length}</div><div class="stat-label">Total Attorneys</div></div></div>`;
+            parsedEmails.forEach(entry => {
+                html += `<div class="attorney-card"><div class="attorney-name">${entry.name || '[No Name Found]'}</div><div class="contact-info"><strong>Emails:</strong> ${entry.emails.join(', ')}</div></div>`;
+            });
+            resultsDiv.innerHTML = html;
+        }
+
+        function generateEmailExcel() {
+            if (parsedEmails.length === 0) {
+                alert('No data to export.');
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+            const header = ['Attorney Name', 'Emails'];
+            const wsData = [header];
+
+            parsedEmails.forEach(entry => {
+                const emailString = entry.emails.join(', ');
+                wsData.push([entry.name, emailString]);
+            });
+            
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            const colWidths = wsData[0].map((_, i) => ({ 
+                width: wsData.reduce((w, r) => Math.max(w, String(r[i] || '').length), 10) + 2 
+            }));
+            ws['!cols'] = colWidths.map(w => ({width: Math.min(w.width, 80)}));
+
+            XLSX.utils.book_append_sheet(wb, ws, "Email List");
+            const dateStr = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `Attorney_Emails_${dateStr}.xlsx`);
         }
     </script>
 </body>
