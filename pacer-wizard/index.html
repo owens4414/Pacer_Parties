@@ -602,7 +602,7 @@
                         </li>
                         <li>Paste it into the text area below (make sure it's all there -- copying text from PACER can be finicky).</li>
                         <li>Click "Parse Counsel Data" to extract attorney information.</li>
-                        <li>Review the parsed data, then click "Generate Excel File" to download the contact info. The Excel file will be a filterable table which makes it easy to create email service lists, etc.  When pasting email addressess from Excel to Outlook, you may need to press tab after pasting for Outlook to recognize the email addresses.</li>
+                        <li>Review the parsed data, then click "Generate Excel File" to download the contact info. The Excel file will be a filterable table which makes it easy to create email service lists, etc.</li>
                     </ol>
                     <div class="note">
                         <strong>📝 Note:</strong> The Excel file will include all parties (represented and unrepresented) except for terminated attorneys (e.g., those who have withdrawn their appearance). Terminated *parties* will be included and noted so long as the attorney is not designated terminated.
@@ -992,7 +992,7 @@ limitations under the License.
 
             let html = `<h3>📧 Parsed Email List</h3><div class="stats-bar"><div class="stat-item"><div class="stat-number">${parsedEmails.length}</div><div class="stat-label">Total Attorneys</div></div></div>`;
             parsedEmails.forEach(entry => {
-                html += `<div class="attorney-card"><div class="attorney-name">${entry.name || '[No Name Found]'}</div><div class="contact-info"><strong>Emails:</strong> ${entry.emails.join(', ')}</div></div>`;
+                html += `<div class="attorney-card"><div class="attorney-name">${entry.name || '[No Name Found]'}</div><div class="contact-info"><strong>Emails:</strong> ${entry.emails.join('; ')}</div></div>`;
             });
             resultsDiv.innerHTML = html;
         }
@@ -1008,7 +1008,7 @@ limitations under the License.
             const wsData = [header];
 
             parsedEmails.forEach(entry => {
-                const emailString = entry.emails.join(', ');
+                const emailString = entry.emails.join('; ');
                 wsData.push([entry.name, emailString]);
             });
             
