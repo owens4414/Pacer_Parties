@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,6 +74,46 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
             overflow: hidden;
             border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .media-banner {
+            display: flex;
+            width: 100%;
+            background: #ffffff;
+            overflow: hidden;
+            align-items: center;
+        }
+
+        .media-banner a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .media-banner a:first-child {
+            flex: 0 0 auto;
+        }
+
+        .media-banner a:last-child {
+            flex: 1;
+            background: #ffffff;
+        }
+
+        .media-banner a:hover {
+            opacity: 0.9;
+        }
+
+        .media-banner img {
+            height: 250px;
+            width: auto;
+            display: block;
+        }
+
+        .media-banner video {
+            height: 250px;
+            width: 100%;
+            display: block;
         }
         
         .header {
@@ -241,6 +283,24 @@
             color: #6c757d;
         }
 
+        @media (max-width: 768px) {
+            .media-banner {
+                flex-direction: column;
+            }
+
+            .media-banner img,
+            .media-banner video {
+                height: 250px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -249,6 +309,18 @@
     <div class="page-wrapper">
         <a href="/" class="home-link">← Back to Home</a>
         <div class="container">
+            <div class="media-banner">
+                <a href="https://exhibitfowapp.com" target="_blank" rel="noopener noreferrer">
+                    <img src="https://raw.githubusercontent.com/owens4414/Pacer_Parties/main/images/EF_Add.png" alt="Exhibit Linker Interface">
+                </a>
+                <a href="https://exhibitfowapp.com" target="_blank" rel="noopener noreferrer">
+                    <video autoplay loop muted playsinline>
+                        <source src="https://raw.githubusercontent.com/owens4414/Pacer_Parties/main/images/EF_Video.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </a>
+            </div>
+
             <div class="header">
                 <h1>🔗 The Smart Way to Link Exhibits.</h1>
                 <p>Exhibit Linker is a free Windows app that automatically creates relative hyperlinks for citations in Word & Excel. Simplify hyperlink creation and ensure your links work even when transferred to another computer.</p>
@@ -305,7 +377,7 @@
                                     F --> G[🎯 Match Files with Citations]
                                     G --> H[🔗 Create relative Links]
                                     H --> I[📊 Generate Output Files]
-                                    I --> J[📑 Linked PDF]
+                                    I --> J[🔒 Linked PDF]
                                     I --> K[📈 Linked Excel]
                                     I --> L[📝 Linked Word Doc]
                             </div>
@@ -321,7 +393,7 @@
                             <p>Exhibit Linker is a Windows application that allows users to select a Word or Excel file and then automatically create relative links to exhibits or Bates-stamped documents. The script reads your document, locates exhibit or Bates citations, uses regex to find the cited documents in a user-designed folder, and then creates relatively linked Word/Excel and PDF output files.</p>
                             <p>As long as your exhibits are in the same folder as your PDF or are otherwise in the same relative position (e.g., the parent PDF in one folder and exhibits in a given subfolder), the linking in the output PDF or Excel will work. Even if the PDF and exhibits are moved elsewhere on your hard drive or to another PC (e.g., via email), so long as the exhibits travel with it in the same relative position, the linking will work.</p>
                             <p>The script can also employ pattern matching to determine the page number in a legal citation (e.g., <code>Ex. 99, Memo, at p. 9</code>) and link to the cited page of the operative PDF exhibit. Further, Bates citations will open the operative PDF even if the cited page is mid-document (e.g., if <code>SMITH_005</code> is found within <code>SMITH_003.pdf</code>, it will link to that file) and, if the output PDF is opened in Chrome, the link will even open to the correct Bates-stamped page. So, in the <code>SMITH_005</code> example, the link would open a Chrome window to page 3 of that PDF.</p>
-                            <p>Exhibits should be saved to a subfolder below the folder in which the primary Word/Excel file exists in order to maximize compatibility with PDF viewers.  However, if the exhibits are kept in the same folder instead, the application can process the filenames (e.g., deleting spacing) to help maximize compatibility.</p>
+                            <p>Exhibits should be saved to a subfolder below the folder in which the primary Word/Excel file exists in order to maximize compatibility with PDF viewers.  However, if the exhibits are kept in the same folder instead, the application can process the filenames (e.g., deleting spacing) to help maximize compatibility.</p>
                         </div>
                     </section>
                     
@@ -364,7 +436,7 @@
             </div>
             
             <footer class="footer">
-                <p>&copy; Litigator Bot 2025.  All Rights Reserved.  This offering is made without any warranty, express or implied.</p>
+                <p>&copy; Litigator Bot 2025.  All Rights Reserved.  This offering is made without any warranty, express or implied.</p>
             </footer>
         </div>
     </div>
@@ -383,6 +455,5 @@
             }
         });
     </script>
-
 </body>
 </html>
