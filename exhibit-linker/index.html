@@ -36,6 +36,26 @@
             box-sizing: border-box;
         }
 
+
+        @media (max-width: 768px) {
+            .media-banner {
+                flex-direction: column;
+            }
+
+            .media-banner img,
+            .media-banner video {
+                height: 250px;
+            }
+
+            /* --- ADD THIS RULE --- */
+            .media-banner a:last-child {
+                display: none;
+            }
+            /* --- END OF ADDED RULE --- */
+
+            .header h1 {
+                font-size: 2rem;
+            }
         /* --- Global Navigation Bar --- */
         .main-nav {
             background-color: #ffffff;
@@ -393,7 +413,7 @@
 
             <div class="header">
                 <h1>🔗 The Smart Way to Link Exhibits.</h1>
-                <p>Exhibit Linker is a free Windows app that automatically creates relative hyperlinks for citations in Word & Excel. Simplify hyperlink creation and ensure your links work even when transferred to another computer.</p>
+                <p>Exhibit Linker is a <u>free</u> Windows app that automatically creates relative hyperlinks for citations in Word & Excel. Simplify hyperlink creation and ensure your links work even when transferred to another computer.</p>
                 <a href="https://raw.githubusercontent.com/owens255/Exhibit-Linker/e56ac67e9e23aa617e65a3ec75f43027a9517130/Exhibit_Linker.zip" class="cta-button">Download for Windows</a> </div>
             
             <div class="content">
