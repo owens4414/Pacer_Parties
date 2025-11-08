@@ -344,7 +344,7 @@
             font-size: 0.9rem;
             color: #6c757d;
         }
-
+        
         @media (max-width: 768px) {
             .media-banner {
                 flex-direction: column;
@@ -353,6 +353,11 @@
             .media-banner img,
             .media-banner video {
                 height: 250px;
+            }
+
+            /* This is the new rule that hides the video on mobile */
+            .media-banner a:last-child {
+                display: none;
             }
 
             .header h1 {
